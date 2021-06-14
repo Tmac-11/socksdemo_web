@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.socksdemo.mapper.HisInfoMapper">
+
+
+    <insert id="insertInfo" parameterType="com.example.socksdemo.model.UserHisInfo" >
+      insert into his_info (user_id,user_name,user_password,startdate,enddate,user_creattime,resource_id,resource_ip,resource_port,resource_loadtime,remark_type)values
+      (#{user_id},#{user_name},#{user_password},#{startdate},#{enddate},#{user_creattime},#{resource_id},#{resource_ip},#{resource_port},#{resource_loadtime},#{remark_type})
+    </insert>
+    
+    
+    <select id="hisInfo"  parameterType="com.example.socksdemo.model.SearchVo" resultType="com.example.socksdemo.model.UserHisInfo">
+        select * from his_info t
+        where 1=1
+    <if test="user_id!=null and user_id!=''">
+            and t.user_id=#{user_id}
+    </if>
+    <if test="user_name!=null and user_name!=''">
+        and t.user_name like concat('%',#{user_name},'%')
+    </if>
+    <if test="resource_ip!=null and resource_ip!=''">
+        and t.resource_ip like concat('%',#{resource_ip},'%')
+    </if>
+    <if test="resource_port!=null and resource_port!=''">
+        and t.resource_port like concat('%',#{resource_port},'%')
+    </if>
+    <if test="startdate!=null">
+        and t.startdate=#{startdate}
+    </if>
+    <if test="enddate!=null">
+        and t.enddate=#{enddate}
+    </if>
+        order by t.his_id asc
+    </select>
+
+
+</mapper>

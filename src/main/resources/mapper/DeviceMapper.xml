@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.socksdemo.mapper.DeviceMapper">
+	<resultMap id="BaseResultMap" type="com.example.socksdemo.model.DeviceVo">
+		<id column="device_id" jdbcType="INTEGER" property="device_id" />
+		<result column="device_ip" jdbcType="VARCHAR" property="device_ip" />
+		<result column="device_state" jdbcType="VARCHAR" property="device_state" />
+		<result column="device_domain_name" jdbcType="VARCHAR" property="device_domain_name" />
+	</resultMap>
+
+	<select id="devicelist" resultType="com.example.socksdemo.model.DeviceVo">
+       select  * from device d where d.device_state=1
+	</select>
+
+	<select id="deviceAll" resultType="com.example.socksdemo.model.DeviceVo">
+		select  * from device
+	</select>
+
+	<update id="updDevice"  parameterType="com.example.socksdemo.model.DeviceVo">
+ 		update device set  device.device_state=#{device_state},device.device_ip=#{device_ip} ,device.device_domain_name=#{device_domain_name}   where device.device_id=#{device_id}
+	</update>
+
+	<delete id="delDevice"  parameterType="java.lang.Integer">
+		delete from device where device.device_id=#{device_id}
+	</delete>
+	
+	<insert id="addDevice" parameterType="com.example.socksdemo.model.DeviceVo">
+		insert into device(device.device_ip,device.device_state,device_domain_name)values(#{device_ip},"1",#{device_domain_name});
+	</insert>
+
+</mapper>

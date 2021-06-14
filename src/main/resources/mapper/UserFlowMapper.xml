@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.socksdemo.mapper.UserFlowMapper">
+
+
+    <insert id="insertData" parameterType="java.util.List" >
+      insert into user_flow (user_name,user_ip,user_port,flow_count,flow_date,flow_json)values
+      <foreach collection="list" item="flowDataVo" index="index" separator=",">
+      (#{flowDataVo.user_name},#{flowDataVo.user_ip},#{flowDataVo.user_port},#{flowDataVo.flow_count} ,
+         #{flowDataVo.flow_date},#{flowDataVo.flow_json})
+      </foreach>
+    </insert>
+
+
+    <insert id="insertOtherData" parameterType="java.util.List" >
+        insert into other_flow (user_name,user_ip,user_port,flow_count,flow_date,flow_json)values
+        <foreach collection="list" item="flowDataVo" index="index" separator=",">
+            (#{flowDataVo.user_name},#{flowDataVo.user_ip},#{flowDataVo.user_port},#{flowDataVo.flow_count},
+            #{flowDataVo.flow_date},#{flowDataVo.flow_json})
+        </foreach>
+    </insert>
+
+    <!--
+    <select id="serverData" resultType="">
+        select sum(t.flow_count) as sumflow ,count(t.user_name!='') as usernum from user_flow t
+          where t.flow_date=#{dateParm} and t.user_ip=#{ipaddr}
+    </select>
+    -->
+
+    <select id="userFlowDataCount" resultType="java.lang.Integer">
+        select count(*) from user_flow t
+        where t.flow_date>=#{startdate}
+            and #{enddate}>=t.flow_date
+    </select>
+
+    <select id="otherFlowDataCount" resultType="java.lang.Integer">
+        select count(*) from other_flow t
+        where t.flow_date>=#{startdate}
+        and #{enddate}>=t.flow_date
+    </select>
+    
+    <delete id="deluserFlowDataCount">
+      delete from user_flow
+       where user_flow.flow_date>=#{startdate}
+            and #{enddate}>=user_flow.flow_date
+
+    </delete>
+
+    <delete id="delotherFlowDataCount">
+        delete from other_flow
+        where other_flow.flow_date>=#{startdate}
+        and #{enddate}>=other_flow.flow_date
+
+    </delete>
+    
+    <select id="deviceMonthData"   resultType="com.example.socksdemo.model.DeviceFlowVo">
+        select DATE_FORMAT(user_flow.flow_date,'%Y-%m') as dataMonth,sum(user_flow.flow_count) as flowCount from user_flow
+        where user_flow.flow_date>=#{startMonth}
+        and  #{endMonth}>=user_flow.flow_date
+        and user_flow.user_ip=#{ip}
+        group by DATE_FORMAT(user_flow.flow_date,'%Y-%m') asc;
+
+    </select>
+
+    <select id="deviceDateData"   resultType="com.example.socksdemo.model.DeviceFlowVo">
+        select user_flow.flow_date as dataMonth,sum(user_flow.flow_count) as flowCount from user_flow
+        where user_flow.flow_date>=#{startMonth}
+        and  #{endMonth}>=user_flow.flow_date
+        and user_flow.user_ip=#{ip}
+        group by user_flow.flow_date asc;
+
+    </select>
+
+
+    <select id="userMonthData"   resultType="com.example.socksdemo.model.DeviceFlowVo">
+        select DATE_FORMAT(user_flow.flow_date,'%Y-%m') as dataMonth,sum(user_flow.flow_count) as flowCount from user_flow
+        where user_flow.flow_date>=#{startMonth}
+        and  #{endMonth}>=user_flow.flow_date
+        and user_flow.user_ip=#{ip}
+        and user_flow.user_port=#{port}
+        group by DATE_FORMAT(user_flow.flow_date,'%Y-%m') asc;
+
+    </select>
+
+    <select id="userDateData"   resultType="com.example.socksdemo.model.DeviceFlowVo">
+        select user_flow.flow_date as dataMonth,sum(user_flow.flow_count) as flowCount from user_flow
+        where user_flow.flow_date>=#{startMonth}
+        and  #{endMonth}>=user_flow.flow_date
+        and user_flow.user_ip=#{ip}
+        and user_flow.user_port=#{port}
+        group by user_flow.flow_date asc;
+
+    </select>
+
+
+    <select id="userHourData"   resultType="com.example.socksdemo.model.DeviceFlowVo">
+        select user_flow.flow_date as dataMonth,user_flow.flow_json as flowJson from user_flow
+        where user_flow.flow_date>=#{startMonth}
+        and  #{endMonth}>=user_flow.flow_date
+        and user_flow.user_ip=#{ip}
+        and user_flow.user_port=#{port}
+    </select>
+
+    <insert id="insertUserFlow" parameterType="java.lang.String" >
+        insert into user_flow select * from user_flow_temp
+                    where date_format(user_flow_temp.flow_date,'%Y-%m-%d')=#{dateParm}
+                           and user_flow_temp.user_name is not null
+
+    </insert>
+
+    <insert id="insertOtherFlow" parameterType="java.lang.String" >
+        insert into other_flow select * from user_flow_temp
+                    where date_format(user_flow_temp.flow_date,'%Y-%m-%d')=#{dateParm}
+                           and user_flow_temp.user_name is  null
+    </insert>
+
+</mapper>

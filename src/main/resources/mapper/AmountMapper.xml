@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.socksdemo.mapper.AmountMapper">
+
+
+    <insert id="insertAmount" parameterType="com.example.socksdemo.model.UserAmount"  >
+      insert into user_amount (user_id,user_name,user_amount,amount_type,amount_creattime,amount_date)values
+      (#{user_id},#{user_name},#{user_amount},#{amount_type},#{amount_creattime},#{amount_date})
+    </insert>
+
+    <select id="queryAmount"  parameterType="com.example.socksdemo.model.UserAmount"  resultType="com.example.socksdemo.model.UserAmount" >
+        select t.amount_id,t.user_name,t.user_amount,t.amount_type,t.amount_creattime,t.amount_date from  user_amount t
+        where 1=1
+        <if test="user_name!=null and user_name!=''">
+            and t.user_name like concat('%',#{user_name},'%')
+        </if>
+
+        <if test="start!=null">
+            and t.amount_creattime >=#{start}
+        </if>
+        <if test="end!=null">
+            and t.amount_creattime  &lt;=#{end}
+        </if>
+        order by t.amount_creattime,t.user_name,t.amount_id  asc
+    </select>
+    
+    <update id="updInfo" parameterType="com.example.socksdemo.model.UserAmount" >
+        update user_amount t set t.user_amount=#{user_amount}   where t.amount_id=#{amount_id}
+    </update>
+
+    <delete id="delInfo" parameterType="java.lang.Integer">
+        delete from user_amount   where user_amount.amount_id=#{amount_id}
+    </delete>
+
+</mapper>

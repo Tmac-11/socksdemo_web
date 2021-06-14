@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.socksdemo.mapper.OrderMapper">
+
+<insert id="insertOrder" parameterType="com.example.socksdemo.model.OrderDataVo" useGeneratedKeys="true" keyColumn="order_id" keyProperty="orderDataVo.order_id">
+    insert into order_data (order_no,
+                             order_email_name,
+                             order_good_name,
+                             order_price,
+                             order_coupons_name,
+                             order_time,
+                             order_status,
+                             order_good_type,
+                             order_type,
+                             order_validity) values
+                               ( #{orderDataVo.order_no},
+                                 #{orderDataVo.order_email_name},
+                                 #{orderDataVo.order_good_name},
+                                 #{orderDataVo.order_price},
+                                 #{orderDataVo.order_coupons_name},
+                                 #{orderDataVo.order_time},
+                                 #{orderDataVo.order_status},
+                                 #{orderDataVo.order_good_type},
+                                 #{orderDataVo.order_type},
+                                 #{orderDataVo.order_validity}
+                               )
+</insert>
+
+    <update id="updOrder" parameterType="java.util.HashMap" >
+        update order_data t
+        <set>
+            <if test="status!=null and status!=''">
+              t.order_status=#{status},
+            </if>
+            <if test="qrType!=null and qrType!=''">
+                t.order_qr_type=#{qrType},
+            </if>
+            <if test="payPrice!=null and payPrice!=''">
+                t.order_pay_price=#{payPrice},
+            </if>
+            <if test="order_validity!=null and order_validity!=''">
+                t.order_validity=#{validity},
+            </if>
+        </set>
+        where t.order_no=#{orderNo}
+    </update>
+
+    <select id="queryOrder" resultType="com.example.socksdemo.model.OrderDataVo">
+        select t.order_email_name,t.order_status,t.order_good_type  from   order_data t
+        where t.order_no=#{orderNo}
+    </select>
+    
+    <select id="queryUserCodeNum" resultType="java.lang.Integer">
+        select ifnull(count(*),0) from order_data t where t.order_status="1" and t.order_coupons_name=#{userCode} and t.order_validity='Y' and t.order_good_type!='experience'
+    </select>
+
+    <select id="queryUserCodeInfo" resultType="java.lang.String">
+        select t.order_no from order_data t where t.order_status="1" and t.order_coupons_name=#{userCode} and t.order_validity='Y'and t.order_good_type!='experience'
+    </select>
+
+    <update id="updValidity" >
+       update order_data t set   t.order_validity='N' where t.order_no in
+        <foreach collection="orderNoStr" item="orderNoStr" open="(" separator="," close=")" index="index">
+            #{orderNoStr}
+        </foreach>
+
+    </update>
+
+</mapper>

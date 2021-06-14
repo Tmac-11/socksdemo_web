@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:>
+<head>
+    <meta charset="UTF-8">
+    <title>修改用户信息</title>
+    <script src="/js/jquery.js"></script>
+</head>
+<body >
+编辑用户信息
+<div th:object="${user}">
+    <form action="" method="post" id="form">
+    <p>用户id： <input th:value="*{user_id}" id="user_id" name="user_id" readonly="readonly" ></p>
+    <p style="color: red">*用户名：<input th:value="*{user_name}" id="user_name" name="user_name" ></p>
+    <p>用户密码：<input th:value="*{user_password}" id="user_password" name="user_password" readonly="readonly"></p>
+    <p style="color: red">*开始日期：<input th:value="*{startdate}" id="startdate" name="startdate"></p>
+    <p style="color: red">*结束日期：<input th:value="*{enddate}" id="enddate" name="enddate"></p>
+    <p style="color: red">*续费金额：<input  id="amount" name="amount"></p>
+    <p style="color: red">*更换服务器次数：<input th:value="*{user_rights}" id="user_rights" name="user_rights" ></p>
+    <p style="color: red">*用户类型：
+        <select id="user_type" name="user_type" >
+        <option value="web">web</option>
+        <option value="exp">exp</option>
+        <option value="adm">adm</option>
+    </select></p>
+
+    <p style="color: red">*开卡类型：<select id="order_good_type" name="order_good_type" onchange="selectCard()">
+            <option value="month">月卡</option>
+            <option value="quarter">季卡</option>
+            <option value="half_year">半年卡</option>
+            <option value="year">年卡</option>
+            <option value="experience">体验卡</option>
+     </select></p>
+    <p>用户ip：<input th:value="*{resource_ip}" id="resource_ip" name="resource_ip" readonly="readonly"></p>
+    <p>用户域名：<input th:value="*{resource_domain_name}" id="resource_domain_name" name="resource_domain_name" readonly="readonly"></p>
+    <p>用户端口：<input th:value="*{resource_port}" id="resource_port" name="resource_port" readonly="readonly"></p>
+    <p>资源类型：<input th:value="*{resource_type}" id="resource_type" name="resource_type" readonly="readonly"></p>
+    <p>json参数：<input th:value="*{resource_json}" id="resource_json" name="resource_json" readonly="readonly"></p>
+    <p>用户推荐码：<input th:value="*{user_code}" id="user_code" name="user_code" readonly="readonly"></p>
+    <p>用户创建时间：<input th:value="${#temporals.format(user.user_creattime, 'yyyy-MM-dd HH:mm:ss')}" id="user_creattime" name="user_creattime"  readonly="readonly"></p>
+    <input th:value="*{resource_id}" id="resource_id" name="resource_id" hidden="hidden">
+    <input th:value="*{resource_state}" id="resource_state" name="resource_state" hidden="hidden">
+    <p>用户状态：<select th:id="select" disabled="disabled">
+        <option value="1">有效</option>
+        <option value="0">无效</option>
+    </select>
+    </p>
+    </form>
+    <input th:value="${user}" hidden="hidden" id="user">
+    <div align="left" style="float:left">
+        <button  th:onclick="'javascript:update()'" id="leftButton"　 >确认</button>
+        <button th:onclick="'javascript:cancel()'" id="rightButton">取消</button>
+    </div>
+
+
+
+
+</div>
+<script language="javascript" type="text/javascript" th:inline="javascript" >
+    window.onload=function init() {
+        $("#amount").val("0.0");
+        var vals=$("#resource_state").val();//后台传回来的值
+        $("#select option[value = '"+vals+"']").attr("selected",true);
+
+        var user=[[${user}]];
+       var user_type= user.user_type;
+        $("#user_type option[value = '"+user_type+"']").attr("selected",true);
+        $("#order_good_type option[value = month]").attr("selected",true);
+    }
+function update() {
+
+        //var user=[[${user}]];
+    var name=$("#user_name").val();
+    var startdate=$("#startdate").val();
+    var enddate=$("#enddate").val();
+    var ip=$("#resource_ip").val();
+    var port=$("#resource_port").val();
+    var amount=$("#amount").val();
+    if(name==""||startdate==""||enddate==""||ip==""||port==""||amount==""){
+        alert("输入框不能为空！");
+        return false;
+    }
+    var status=checkEmailFormat();
+
+    if(status==false){
+        return false;
+    }
+
+
+    var dateFormat =/^(\d{4})-(\d{2})-(\d{2})$/;
+    if(dateFormat.test(startdate)&&dateFormat.test(enddate)){
+        $("#form").attr("action", "/indexController/updUser");
+        $("#form").submit();
+    }else{
+        alert("输入正确的日期格式!如：2019-10-01");
+        return false;
+    }
+
+
+}
+
+function cancel() {
+    window.location.href="/indexController/userInfoHtml";
+}
+
+    function checkEmailFormat(){
+        var reg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/; //正则表达式
+        var obj =  document.getElementById("user_name"); //要验证的对象
+        if(obj.value === ""){ //输入不能为空
+            alert("邮箱号输入不能为空!");
+            return false;
+        }else if(!reg.test(obj.value)){ //正则验证不通过，格式不对
+            alert("邮箱验证不通过!");
+            return false;
+        }else{
+
+            return true;
+        }
+
+    }
+
+
+    function selectCard() {
+        var order_good_type= $("#order_good_type").val();
+        var startDt= $("#startdate").val();
+        if(startDt==""){
+            alert("请先输入一个开始日期！");
+            return false;
+        }else {
+            var endDt=addDays(startDt,order_good_type);
+            $("#startdate").val(startDt);
+            $("#enddate").val(endDt);
+        }
+
+
+    }
+
+    function addDays(startDt,cardType) {
+        var date = new Date(startDt);
+        var year= date.getFullYear();
+        var m=date.getMonth()+1;
+        m=m<10? '0'+m :m;
+        var d=date.getDate();
+        d= d<10? ('0'+d):d;
+        var startDate=year+"-"+m+"-"+d;
+        var today= date.getTime();
+        if("month"==cardType){
+            var endtime=today+60*60*1000*24*30;
+        }else if("quarter"==cardType){
+            var endtime=today+60*60*1000*24*90;
+        }else if("half_year"==cardType){
+            var endtime=today+60*60*1000*24*180;
+        }else if("year"==cardType){
+            var endtime=today+60*60*1000*24*365;
+        }else if("experience"==cardType) {
+            var endtime=today+60*60*1000*24*2;
+        }
+
+        //  var endDate= new Date(endtime).toISOString().split('T')[0];
+        var endDate= new Date(endtime);
+        var endyear= endDate.getFullYear();
+        var endm=endDate.getMonth()+1;
+        endm=endm<10? '0'+endm :endm;
+        var endd=endDate.getDate();
+        endd= endd<10? ('0'+endd):endd;
+        var endDate=endyear+"-"+endm+"-"+endd;
+
+        return endDate;
+    }
+    
+</script>
+</body>
+</html>

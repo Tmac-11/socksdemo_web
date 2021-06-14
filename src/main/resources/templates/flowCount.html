@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" >
+<head>
+    <meta charset="UTF-8">
+    <title>手动计算页面</title>
+    <script src="/js/jquery.js"></script>
+</head>
+<body>
+<div>
+    <form id="searchForm" method="post">
+         时间： <input text="" id="startdate" name="startdate" > 结束时间： <input text=""  id="enddate" name="enddate" >
+        操作表：<select id="select_table" name="select_table">
+        <option value="">--请选择--</option>
+        <option value="src_flow_data">src_flow_data</option>
+        <option value="user_flow">user_flow</option>
+        <option value="other_flow">other_flow</option>
+    </select>
+    </form>
+    时间格式：2020-01-01
+</div>
+<br/>
+<div>
+    <button  th:onclick="'javascript:search()'" id="searchButton"　 style="width: 100px; height: 35px;" >查询</button>
+    <button th:onclick="'javascript:deldata()'" id="delButton" style="width: 100px; height: 35px;">删除</button>
+</div>
+<br/>
+<div>
+    <input text="" id="query_msg" name="query_msg"  hidden="hidden" style="width: 150px; height: 25px;" />
+</div>
+<br/>
+<br/>
+<div>
+    <form id="analyticalForm" method="post">
+    解析时间：<input text="" id="fileDate" name="fileDate" >
+    </form>
+
+    时间格式：2020_1_1
+    <br/>
+    <button th:onclick="'javascript:analytical()'" id="analyticalButton" style="width: 100px; height: 35px;">解析导入</button>
+
+</div>
+<br/>
+<br/>
+<div>
+
+      计算时间： <input text="" id="countDate" name="countDate" >
+    时间格式：2020-01-01
+    <br/>
+    <button th:onclick="'javascript:count()'" id="countButton" style="width: 100px; height: 35px;">计算</button>
+</div>
+
+<div>
+    <input text="" id="msg" name="msg"  hidden="hidden" style="width: 150px; height: 25px;" />
+
+</div>
+
+</body>
+</html>
+<script language="javascript" type="text/javascript" >
+function search() {
+  var startdate=  $("#startdate").val();
+  var enddate=  $("#enddate").val();
+  var select_table=  $("#select_table").val();
+
+  if(startdate==""||enddate==""||select_table==""){
+         alert("输入时间范围和操作表！");
+  }else{
+
+      $.ajax({
+          type:"post",
+          url:"/flowController/queryData",
+          dataType:"json",
+          data:$("#searchForm").serialize(),
+          success:function (data) {
+
+              $("#query_msg").show();
+              $("#query_msg").val("查询数量："+data);
+
+          },
+          error:function (data) {
+              $("#query_msg").show();
+              $("#query_msg").val("查询失败！");
+
+          }
+      })
+  }
+
+}
+
+
+function deldata() {
+    var startdate = $("#startdate").val();
+    var enddate = $("#enddate").val();
+    var select_table = $("#select_table").val();
+
+    if (startdate == "" || enddate == "" || select_table == "") {
+        alert("输入时间范围和操作表！");
+    } else {
+
+        $.ajax({
+            type: "post",
+            url: "/flowController/delData",
+            dataType: "json",
+            data: $("#searchForm").serialize(),
+            success: function (data) {
+
+                $("#query_msg").show();
+                $("#query_msg").val("删除数量：" + data);
+
+            },
+            error: function (data) {
+                $("#query_msg").show();
+                $("#query_msg").val("删除失败！");
+
+            }
+        })
+    }
+}
+
+function analytical() {
+    var fileDate=  $("#fileDate").val();
+
+    if(fileDate==""){
+        alert("输入时间！");
+    }else{
+        $("#analyticalForm").attr("action", "/flowController/manualData");
+        $("#analyticalForm").submit();
+    }
+}
+
+
+function count() {
+    var countDate=  $("#countDate").val();
+    if(countDate==""){
+        alert("输入时间！");
+    }else{
+        $.ajax({
+            type:"post",
+            url:"/flowController/countFlow",
+            timeout: 0,
+            dataType:"json",
+            data:{countDate:countDate},
+            success:function (data) {
+
+                $("#msg").show();
+                $("#msg").val("计算成功！");
+
+            },
+            error:function (data) {
+                $("#msg").show();
+                $("#msg").val("计算失败！");
+
+            }
+        })
+    }
+
+
+
+}
+</script>
+   

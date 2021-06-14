@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:text="${info}" >
+</div>
+<div th:if="${user}!=null">
+    <table border="1" cellspacing="0">
+        <caption align="top">用户信息返回</caption>
+        <tr style="background-color: #c1c2ca">
+            <th>用户名</th>
+            <th>用户密码</th>
+            <th>资源域名</th>
+            <th>资源端口</th>
+        </tr>
+        <tr>
+            <td th:text="${user.user_name}"></td>
+            <td th:text="${user.user_password}"></td>
+            <td th:text="${user.resource_domain_name}"></td>
+            <td th:text="${user.resource_port}"></td>
+        </tr>
+        <tr style="background-color: #c1c2ca">
+            <th>资源ip</th>
+            <th>加密方式</th>
+            <th>推荐码</th>
+            <th>更换服务器次数</th>
+        </tr>
+        <tr>
+            <td th:text="${user.resource_ip}"></td>
+            <td th:text="${user.key_type}"></td>
+            <td th:text="${user.user_code}"></td>
+            <td th:text="${user.user_rights}"></td>
+        </tr>
+    </table>
+</div>
+<div>
+    <p>
+        二维码解析代码
+    </p>
+    <p>
+        <input type="text" th:value="${qrcode_info}" style="height: 20px;width: 500px;" />
+    </p>
+</div>
+
+<div class="container" th:if="${imgSrc}!=null">
+    <img alt="qrcode" th:src="@{'data:img/png;base64,'+${imgSrc}}"/>
+    <footer>
+        <p>
+            © <a >socksdemo</a> 2019
+        </p>
+    </footer>
+</div>
+
+<div data-th-fragment="header">
+    <a href="/indexController/index">首页</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:>
+<head>
+    <meta charset="UTF-8">
+    <title>查看日志</title>
+    <script src="/js/jquery.js"></script>
+</head>
+<body>
+<br/>
+读取日志文件目录：<input type="text"  name="pathString" id="pathString" value="">
+<br/>
+<br/>
+<div>
+    <button th:onclick="'javascript:search()'" id="searchButton" style="width: 100px; height: 35px;" >打开文件</button>
+    <button th:onclick="'javascript:reset()'" id="clearButton" style="width: 100px; height: 35px;" >清空内容</button>
+    <button th:onclick="'javascript:index()'" id="indexButton" style="width: 100px; height: 35px;">返回首页</button>
+
+</div>
+<br/>
+<div id="container"  >
+
+
+
+    <div style="text-align:center" id="textarea"></div>
+
+</div>
+
+
+
+<style type="text/css">
+    #container{
+        min-width: 0px;
+        min-height: 30px;
+        border: 2px dotted #000;
+        -moz-border-radius: 8px;
+        background-color:yellow;
+    }
+</style>
+
+
+
+<script type="text/javascript"  th:inline="javascript" >
+    window.onload=function init () {
+        var path= [[${filepath}]];
+
+        $("#textarea").html("显示内容");
+        $("#pathString").val(path);
+
+    }
+
+    function index() {
+
+        window.location.href="/indexController/index";
+    }
+    function search() {
+
+       var path= $("#pathString").val();
+        if(path==""){
+            alert("请输入文件路径！");
+            return false;
+        }
+        var suffixIndex=path.lastIndexOf(".");
+        var suffix=path.substring(suffixIndex);
+       // alert(suffix);
+        if(suffix==".txt"||suffix==".log"){
+            $.ajax({
+                type:"post",
+                url:"/indexController/queryLogFile",
+                dataType:'text',
+                contentType : "text/html;charset=UTF-8",
+                data:$("#pathString").val(),
+                success:function (data) {
+
+                        $("#textarea").html("");
+                        $("#textarea").append(data);
+
+                },
+                error: function(data){
+                    alert(data);
+                }
+            })
+        }else{
+            alert("文件必须是txt文件或者log文件！");
+            return false;
+        }
+    }
+
+    function reset() {
+
+        $("#textarea").html("");
+        $("#textarea").html("显示内容");
+    }
+
+</script>
+</body>
+</html>

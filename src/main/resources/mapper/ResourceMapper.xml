@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.socksdemo.mapper.ResourceMapper">
+
+	<resultMap id="BaseResultMap" type="com.example.socksdemo.model.ResourceVo">
+		<id column="resource_id" jdbcType="INTEGER" property="resource_id" />
+		<result column="resource_ip" jdbcType="VARCHAR" property="resource_ip" />
+		<result column="resource_port" jdbcType="VARCHAR" property="resource_port" />
+		<result column="resource_state" jdbcType="VARCHAR" property="resource_state" />
+		<result column="resource_loadtime" jdbcType="TIMESTAMP" property="resource_loadtime"  javaType="java.time.LocalDateTime"/>
+		<result column="resource_json" jdbcType="VARCHAR" property="resource_json" />
+		<result column="resource_domain_name" jdbcType="VARCHAR" property="resource_domain_name"/>
+	</resultMap>
+
+	<select id="ResourceIpCount" parameterType="java.lang.String" resultMap="BaseResultMap">
+       select  r.resource_id,r.resource_ip,r.resource_port,resource_state,resource_loadtime,resource_type
+        from resource r where r.resource_state="1" and r.resource_ip=#{resourceIp}
+ 	</select>
+
+	<select id="ResourceCount" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select  r.resource_id,r.resource_ip,r.resource_port,resource_state,resource_loadtime,resource_type
+		from resource r where  r.resource_ip=#{resourceIp}
+	</select>
+
+	<insert id="insertResource" parameterType="com.example.socksdemo.model.ResourceVo" useGeneratedKeys="true" keyProperty="resource_id" >
+		insert into resource  (resource_ip,resource_port,resource_state,resource_loadtime,resource_type,resource_json,resource_domain_name)values
+		(#{resource_ip},#{resource_port},#{resource_state},#{resource_loadtime},#{resource_type},#{resource_json},#{resource_domain_name})
+	</insert>
+	
+	<update id="updResource" parameterType="com.example.socksdemo.model.UserInfo">
+			update resource
+		<set>
+		<if test="resource_ip!=null and resource_ip!=''">
+			resource.resource_ip=#{resource_ip},
+		</if>
+		<if test="resource_port!=null and resource_port!=''">
+			resource.resource_port=#{resource_port},
+		</if>
+		<if test="resource_state!=null and resource_state!=''">
+			resource.resource_state=#{resource_state},
+		</if>
+		<if test="resource_type!=null and resource_type!=''">
+				resource.resource_type=#{resource_type},
+		</if>
+		<if test="resource_json!=null and resource_json!=''">
+				resource.resource_json=#{resource_json},
+		</if>
+		<if test="resource_domain_name!=null and resource_domain_name!=''">
+				resource.resource_domain_name=#{resource_domain_name}
+		</if>
+
+
+		</set>
+			where  resource.resource_id=#{resource_id}
+
+	</update>
+
+	<delete id="delResource" parameterType="java.lang.Integer">
+	   delete from resource where  resource.resource_id=#{resource_id}
+	</delete>
+
+	<select id="ResourceByid" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+		select  r.resource_id,r.resource_ip,r.resource_port,r.resource_state,r.resource_loadtime,r.resource_type
+		from resource r where  r.resource_id=#{resource_id}
+	</select>
+	
+	
+	<select id="ResourceEffective" resultType="java.lang.String">
+			select distinct r.resource_ip from resource r where r.resource_state='1'
+	</select>
+
+	<select id="getUserList" parameterType="java.lang.String" resultType="com.example.socksdemo.model.UserInfo">
+		select  r.resource_ip,r.resource_port,u.user_name from
+		     resource r left join user_socks u
+		                on r.resource_id=u.resource_id
+		          where r.resource_ip=#{resource_ip}
+	</select>
+	
+
+
+</mapper>

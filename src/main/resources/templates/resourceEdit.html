@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:>
+<head>
+    <meta charset="UTF-8">
+    <title>分配新资源</title>
+    <script src="/js/jquery.js"></script>
+</head>
+<body >
+
+
+<div th:object="${user}" id="left" style="width:35%;height:50%;float:left;">
+    原用户信息
+    <form action="" method="post" id="form">
+    <p>用户id： <input th:value="*{user_id}" id="user_id" name="user_id" readonly="readonly" ></p>
+    <p>用户名：<input th:value="*{user_name}" name="user_name" readonly="readonly"></p>
+    <p>用户密码：<input th:value="*{user_password}" id="user_password" name="user_password" readonly="readonly"></p>
+    <p>开始日期：<input th:value="*{startdate}" id="startdate" name="startdate" readonly="readonly"　></p>
+    <p>结束日期：<input th:value="*{enddate}" id="enddate" name="enddate" readonly="readonly"></p>
+    <p>用户失效ip：<input th:value="*{resource_ip}" id="resource_ip" name="resource_ip" readonly="readonly"></p>
+    <p>用户失效端口：<input th:value="*{resource_port}" id="resource_port" name="resource_port" readonly="readonly"></p>
+    <p>资源类型：<input th:value="*{resource_type}" id="resource_type" name="resource_type" readonly="readonly"></p>
+    <p>json参数：<input th:value="*{resource_json}" id="resource_json" name="resource_json" readonly="readonly" style="width:350px;height: 20px;"></p>
+    <p>用户创建时间：<input th:value="${#temporals.format(user.user_creattime, 'yyyy-MM-dd HH:mm:ss')}" id="user_creattime" name="user_creattime"  readonly="readonly"></p>
+    <input th:value="*{resource_id}" id="resource_id" name="resource_id" hidden="hidden">
+    <input th:value="*{resource_state}" id="resource_state" name="resource_state" hidden="hidden">
+
+    <p>用户状态：<select id="select" disabled="disabled">
+        <option value="1">有效</option>
+        <option value="0">无效</option>
+    </select>
+    </p>
+    </form>
+    </div>
+
+    <div id="right" style="width:45%;height:50%;float:left;">
+        新分配资源
+        <form method="post" id="updform" >
+        <input th:value="${user.user_id}" hidden="hidden" id="user_id" name="user_id">
+        <input th:value="${user.resource_id}" hidden="hidden" id="resource_id" name="resource_id">
+        <input th:value="${user.user_code}" id="user_code" name="user_code" hidden="hidden">
+        <input th:value="${user.user_rights}" id="user_rights" name="user_rights" hidden="hidden">
+         <input th:value="${user.user_type}" id="user_type" name="user_type" hidden="hidden">
+
+        <input th:value="${user.resource_state}" hidden="hidden" id="resource_state" name="resource_state">
+        <input th:value="${#temporals.format(user.user_creattime, 'yyyy-MM-dd HH:mm:ss')}" hidden="hidden" id="user_creattime" name="user_creattime">
+           <p> 用户名：<input th:value="${user.user_name}"id="user_name" name="user_name"></p>
+           <p>新ip：<input readonly="readonly" id="newIp" name="newIp" value="" ></p>
+           <p>新域名：<input readonly="readonly" id="newDomainName" name="newDomainName" value="" ></p>
+           <p> 新端口：<input readonly="readonly" id="newPort" name="newPort" value=""></p>
+           <p>新密码：<input readonly="readonly" id="newPassword" name="newPassword" value="">
+            </p>
+            <p>
+            获取资源类型：
+            <select id="select_type" name="select_type" onchange="selectIp()">
+                <option value="noselect">--请选择--</option>
+                <option value="auto">自动</option>
+                <option value="manual">手动</option>
+            </select>
+            </p>
+            <p>
+             <div id="apecifiedDiv" hidden="hidden">
+            <select id="select_ip" name="select_ip" >
+                <option value="noselect">--请选择--</option>
+            </select>
+            &nbsp;&nbsp;&nbsp;<button  type="button" th:onclick="'javascript:apecified()'" id="apecifiedButton"　 >获取指定资源</button>
+            </div>
+            <div id="antoDiv" hidden="hidden">
+           <button  type="button" th:onclick="'javascript:anto()'" id="antoButton"　 >获取随机资源</button>
+            </div>
+            </p>
+            <p>
+            申请资源方式：
+            <select id="new_resource_type" name="new_resource_type">
+                <option value="noselect">--请选择--</option>
+                <option value="HTTP">HTTP</option>
+                <option value="UDP">UDP</option>
+
+            </select>
+            </p>
+            <p>
+                设置超时时间：
+                <input type="text" name="new_timeout" id="new_timeout">
+            </p>
+            <p>
+            加密类型:
+            <select id="new_key_type" name="new_key_type">
+                <option value="noselect">--请选择--</option>
+                <option value="rc4-md5">rc4-md5</option>
+                <option value="salsa20">salsa20</option>
+                <option value="chacha20">chacha20</option>
+                <option value="chacha20-ietf">chacha20-ietf</option>
+                <option value="aes-256-cfb">aes-256-cfb</option>
+                <option value="aes-192-cfb">aes-192-cfb</option>
+                <option value="aes-128-cfb">aes-128-cfb</option>
+                <option value="aes-256-ctr">aes-256-ctr</option>
+                <option value="aes-192-ctr">aes-192-ctr</option>
+                <option value="aes-128-ctr">aes-128-ctr</option>
+                <option value="bf-cfb">bf-cfb</option>
+                <option value="camellia-128-cfb">camellia-128-cfb</option>
+                <option value="camellia-192-cfb">camellia-192-cfb</option>
+                <optlion value="camellia-256-cfb">camellia-256-cfb</optlion>
+                <option value="aes-128-gcm">aes-128-gcm</option>
+                <option value="aes-192-gcm">aes-192-gcm</option>
+                <option value="aes-256-gcm">aes-256-gcm</option>
+                <option value="chacha20-ietf-poly1305">chacha20-ietf-poly1305</option>
+                <option value="xchacha20-ietf-poly1305">xchacha20-ietf-poly1305</option>
+            </select>
+            </p>
+            <p>
+            转发报文模式：
+            <select id="new_mode" name="new_mode">
+                <option value="noselect">--请选择--</option>
+                <option value="tcp_and_udp">tcp_and_udp</option>
+            </select>
+            </p>
+            <p>
+          <!--  是否使用插件：
+            <select id="new_fast_open" name="new_fast_open">
+                <option value="noselect">--请选择--</option>
+                <option value="false">false</option>
+                <option value="ture">ture</option>
+            </select>
+
+            </p>-->
+            <p>
+            插件：
+            <select id="new_plugin" name="new_plugin">
+                <option value="noselect">--请选择--</option>
+                <option value="v2ray">v2ray</option>
+                <option value="obfs">obfs</option>
+            </select>
+            </p>
+            <p>
+                是否强制更换资源：
+                <select id="forced_state" name="forced_state">
+                    <option value="1">强制</option>
+                    <option value="0">非强制</option>
+                </select>
+            </p>
+            <p>开始日期：<input th:value="${user.startdate}" id="new_startdate" name="new_startdate"　></p>
+            <p>结束日期：<input th:value="${user.enddate}" id="new_enddate" name="new_enddate" ></p>
+
+           <p> 开卡类型：<select id="order_good_type" name="order_good_type" onchange="selectCard()">
+                <option value="month">月卡</option>
+                <option value="quarter">季卡</option>
+                <option value="half_year">半年卡</option>
+                <option value="year">年卡</option>
+                <option value="experience">体验卡</option>
+            </select></p>
+        </form>
+        <div >
+            <!-- <button th:onclick="'javascript:manual()'" id="rightButton">手动配置资源</button>-->
+            <button th:onclick="'javascript:manual()'" id="submitButton">提交配置</button>
+            <button th:onclick="'javascript:cancel()'" id="cancelButton">取消配置</button>
+        </div>
+
+    </div>
+
+
+
+
+
+
+<script language="javascript" type="text/javascript" th:inline="javascript" >
+    window.onload=function init() {
+
+        var vals=$("#resource_state").val();//后台传回来的值
+        $("#select option[value = '"+vals+"']").attr("selected",true);
+
+        $("#new_resource_type option[value = HTTP]").attr("selected",true);
+        $("#new_key_type option[value = salsa20]").attr("selected",true);
+        $("#new_mode option[value = tcp_and_udp]").attr("selected",true);
+        $("#new_fast_open option[value = false]").attr("selected",true);
+        $("#forced_state option[value = 0]").attr("selected",true);
+        $("#new_timeout").val("300");
+        $("#order_good_type option[value = month]").attr("selected",true);
+    }
+function anto() {
+
+       $.ajax({
+           type:"get",
+           url:"/resourceController/antoResource",
+           success:function (data) {
+              var resource=data;
+              $("#newIp").val(resource.resource_ip);
+              $("#newPassword").val(resource.user_password);
+              $("#newPort").val(resource.resource_port);
+               $("#newDomainName").val(resource.resource_domain_name);
+           }
+       });
+
+}
+
+function cancel() {
+    window.location.href="/indexController/userInfoHtml";
+}
+
+
+    function checkEmailFormat(){
+        var reg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/; //正则表达式
+        var obj =  document.getElementById("user_name"); //要验证的对象
+       // alert(obj.value);
+        if(obj.value === ""){ //输入不能为空
+            alert("邮箱号输入不能为空!");
+            return false;
+        }else if(!reg.test(obj.value)){ //正则验证不通过，格式不对
+            alert("邮箱验证不通过!");
+            return false;
+        }else{
+
+            return true;
+        }
+
+    }
+ function manual() {
+   var ip= $("#newIp").val();
+   var passward= $("#newPassword").val();
+   var port=$("#newPort").val();
+    var key_type= $("#new_key_type").val();
+    var resource_type= $("#new_resource_type").val();
+     var new_startdate= $("#new_startdate").val();
+     var new_enddate= $("#new_enddate").val();
+
+
+     if(ip==""||passward==""||port==""||key_type=="noselect"||resource_type=="noselect"||new_startdate==""||new_enddate==""){
+         alert("请先分配资源或者选择资源类型和加密方式再提交！");
+         return false;
+     }
+
+    var status= checkEmailFormat();
+     if(status==false){
+         return false;
+     }
+
+
+    var state=$("#resource_state").val();
+    if(state==1){
+      var a=  confirm("此用户仍在有效期内，是否重新分配？")
+        if(a){
+            $("#updform").attr("action", "/indexController/userResource");
+            $("#updform").submit();
+        }
+    }else {
+        $("#updform").attr("action", "/indexController/userInfoHtml");
+        $("#updform").submit();
+    }
+
+
+
+ }
+
+
+    function selectIp() {
+        var select_type= $("#select_type").val();
+        var select_ip = document.getElementById("select_ip");
+
+
+        if(select_type=='manual'){
+            $("#newIp").val("");
+            $("#newPassword").val("");
+            $("#newPort").val("");
+            $("#newDomainName").val("");
+            $("#antoDiv").hide();
+            select_ip.options.length=0;
+            var ipOpt_one = document.createElement('option');
+            ipOpt_one.innerText ="--请选择--";
+            ipOpt_one.value = "noselect";
+            select_ip.appendChild(ipOpt_one)
+            $.ajax({
+                type:"get",
+                url:"/deviceController/effectiveDevice",
+                success:function (data) {
+                    var deviceVo=data;
+                    for(var i=0;i<deviceVo.length;i++){
+                        var ipOpt = document.createElement('option');
+                        ipOpt.innerText =deviceVo[i].device_domain_name;
+                        ipOpt.value = deviceVo[i].device_ip+"/"+deviceVo[i].device_domain_name;
+                        select_ip.appendChild(ipOpt);
+                    }
+
+                    $("#apecifiedDiv").show();
+
+                }
+            })
+
+
+
+        }else if(select_type=='auto'){
+            $("#newIp").val("");
+            $("#newPassword").val("");
+            $("#newPort").val("");
+            $("#newDomainName").val("");
+            $("#apecifiedDiv").hide();
+            $("#antoDiv").show();
+//            select_ip.options.length=0;
+//            var ipOpt_one = document.createElement('option');
+//            ipOpt_one.innerText ="--请选择--";
+//            ipOpt_one.value = "noselect";
+//            select_ip.appendChild(ipOpt_one);
+        }else{
+            $("#newIp").val("");
+            $("#newPassword").val("");
+            $("#newPort").val("");
+            $("#newDomainName").val("");
+            $("#apecifiedDiv").hide();
+            $("#antoDiv").hide();
+        }
+
+    }
+    
+    
+    function apecified() {
+        var select_ip=$("#select_ip").val();
+        //alert(select_ip);
+        if(select_ip=='noselect'){
+            alert("请选择指定服务器！");
+            return false;
+        }
+        $.ajax({
+            type:"get",
+            url:"/resourceController/apecifiedResource?deviceName="+select_ip,
+            success:function (data) {
+                var resource=data;
+                $("#newIp").val(resource.resource_ip);
+                $("#newPassword").val(resource.user_password);
+                $("#newPort").val(resource.resource_port);
+                $("#newDomainName").val(resource.resource_domain_name);
+            }
+        });
+        
+    }
+
+
+
+    function selectCard() {
+        var order_good_type= $("#order_good_type").val();
+        var startDt= $("#new_startdate").val();
+        if(startDt==""){
+            alert("请先输入一个开始日期！");
+            return false;
+        }else {
+            var endDt=addDays(startDt,order_good_type);
+            $("#new_startdate").val(startDt);
+            $("#new_enddate").val(endDt);
+        }
+
+
+    }
+
+    function addDays(startDt,cardType) {
+        var date = new Date(startDt);
+        var year= date.getFullYear();
+        var m=date.getMonth()+1;
+        m=m<10? '0'+m :m;
+        var d=date.getDate();
+        d= d<10? ('0'+d):d;
+        var startDate=year+"-"+m+"-"+d;
+        var today= date.getTime();
+        if("month"==cardType){
+            var endtime=today+60*60*1000*24*30;
+        }else if("quarter"==cardType){
+            var endtime=today+60*60*1000*24*90;
+        }else if("half_year"==cardType){
+            var endtime=today+60*60*1000*24*180;
+        }else if("year"==cardType){
+            var endtime=today+60*60*1000*24*365;
+        }else if("experience"==cardType) {
+            var endtime=today+60*60*1000*24*2;
+        }
+
+        //  var endDate= new Date(endtime).toISOString().split('T')[0];
+        var endDate= new Date(endtime);
+        var endyear= endDate.getFullYear();
+        var endm=endDate.getMonth()+1;
+        endm=endm<10? '0'+endm :endm;
+        var endd=endDate.getDate();
+        endd= endd<10? ('0'+endd):endd;
+        var endDate=endyear+"-"+endm+"-"+endd;
+
+        return endDate;
+    }
+    
+</script>
+</body>
+</html>

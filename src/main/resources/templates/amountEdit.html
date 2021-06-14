@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:>
+<head>
+    <meta charset="UTF-8">
+    <title>修改信息</title>
+    <script src="/js/jquery.js"></script>
+</head>
+<body >
+编辑帐单信息
+<div th:object="${amount}">
+    <form action="" method="post" id="form">
+    <p>帐单id： <input th:value="*{amount_id}" id="amount_id" name="amount_id" readonly="readonly" ></p>
+    <p>用户名：<input th:value="*{user_name}" id="user_name" name="user_name" readonly="readonly"></p>
+    <p>*金额：<input th:value="*{user_amount}" id="user_amount" name="user_amount" ></p>
+    <p>帐单类型：<input th:value="*{amount_type}" id="amount_type" name="amount_type" readonly="readonly"></p>
+    <p>费用时间：<input th:value="*{amount_date}" id="amount_date" name="amount_date" readonly="readonly"></p>
+    <p>创建时间：<input  th:value="*{amount_creattime}" id="amount_creattime" name="amount_creattime" readonly="readonly"></p>
+    </form>
+    <div align="left" style="float:left">
+        <button  th:onclick="'javascript:update()'" id="leftButton"　 >确认</button>
+        <button th:onclick="'javascript:cancel()'" id="rightButton">取消</button>
+    </div>
+
+
+
+
+</div>
+<script language="javascript" type="text/javascript" th:inline="javascript" >
+
+function update() {
+
+        //var user=[[${user}]];
+    var user_amount=$("#user_amount").val();
+
+    if(user_amount==""){
+        alert("输入框不能为空！");
+        return false;
+    }
+
+        $("#form").attr("action", "/amountController/updAmount");
+        $("#form").submit();
+
+
+}
+
+function cancel() {
+    window.location.href="/amountController/amountHtml";
+}
+    
+</script>
+</body>
+</html>

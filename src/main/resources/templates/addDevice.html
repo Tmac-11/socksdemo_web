@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title> 新增设备</title>
+    <script src="/js/jquery.js"></script>
+</head>
+<body>
+<div data-th-fragment="header">
+    <a href="/indexController/index">返回首页</a>
+</div>
+<br/>
+<form action="" method="post" id="form" >
+    新增设备ip:
+    <input type="text" name="device_ip" id="device_ip">
+    <br/>
+    新增设备域名：
+    <input type="text" name="device_domain_name" id="device_domain_name">
+
+    <br/>
+    <input type="submit" value="提交" id="submit">
+</form>
+<script language="javascript" type="text/javascript" >
+
+    $("#form").submit(
+        function () {
+            var ip= $("#device_ip").val();
+            var device_domain_name= $("#device_domain_name").val();
+
+            if(ip==""||device_domain_name==""){
+                alert("请输入域名或者ip值！");
+                $("#form").attr("action", "/deviceController/addDeviceHtml");
+
+            }else{
+                $("#form").attr("action", "/deviceController/addDevice");
+
+            }
+        }
+    );
+</script>
+</body>
+</html>

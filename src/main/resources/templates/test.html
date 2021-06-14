@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" >
+
+<head>
+    <meta charset="UTF-8">
+    <title>test</title>
+    <script src="/js/jquery-1.8.3.min.js"></script>
+
+    <script  type="text/javascript" src="/js/MultipleSelect.js">
+    </script>
+    <link rel="stylesheet" type="text/css" href="/css/MultipleSelect.css">
+
+
+</head>
+<body>
+<p>test</p>
+<div>
+
+    <img alt="qrcode" th:src="@{/img/online.jpg}" style="width: 50px;height: 50px;"/>
+
+</div>
+<br/>
+<br/>
+<div>
+ <!--  选择城市: <select id="cityNameTest" name="cityNameTest"  multiple="multiple"></select>-->
+</div>
+<br/>
+<br/>
+
+
+<script language="javascript" type="text/javascript" th:inline="javascript" >
+    window.onload=function init() {
+        //var cityNameTest = document.getElementById("cityNameTest");
+        var cityName = document.getElementById("cityName");
+        cityName.options.length=0;
+        //cityNameTest.options.length=0;
+        var ipOpt = document.createElement('option');
+        ipOpt.innerText ="--请选择--";
+        ipOpt.value = "";
+       cityName.appendChild(ipOpt);
+
+        for(var i=0;i<3;i++){
+
+            var ipOpt = document.createElement('option');
+            ipOpt.innerText ='城市'+i;
+            ipOpt.value = '城市test'+i;
+            cityName.appendChild(ipOpt);
+            //cityNameTest.appendChild(ipOpt);
+
+        }
+
+
+        //$("#cityNameTest").fSelect();
+        $("#areaName").fSelect();
+
+    }
+
+
+
+
+
+    function selectCity() {
+        var city_type= $("#cityName").val();
+
+        if(city_type==''){
+            $("#areaName").fSelect();
+          return false;
+
+        }else {
+
+            $.ajax({
+                type:"post",
+                dataType: "json",
+                url: "/flowShowController/testArea?cityName="+city_type,
+                success:function (data) {
+//                    var select_user = document.getElementById("userName");
+//                    select_user.options.length=0;
+//
+//                    for(var i=0;i<data.length;i++){
+//                        //alert(data[i].user_name);
+//                        var userOpt = document.createElement('option');
+//                        userOpt.innerText =data[i].user_name;
+//                        userOpt.value =data[i].resource_port;
+//                        select_user.appendChild(userOpt);
+//
+//                    }
+
+                    alert(data.length);
+                    for(var i=0;i<data.length;i++){
+                        alert(data[i].toString());
+                        //$("#arwaName").append("<option value='"+data[i].resource_port+"'>"+data[i].user_name+"</option>");
+                    }
+
+                 
+
+
+                }
+            })
+
+
+        }
+
+    }
+
+
+
+
+    function resets(){
+        $("#start").val("");
+        $("#end").val("");
+    }
+
+
+</script>
+</body>
+</html>
+

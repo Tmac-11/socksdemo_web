@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.socksdemo.mapper.SrcFlowDataMapper">
+
+
+    <insert id="insertFlowData" parameterType="java.util.List" >
+      insert into src_flow_data (src_flow_data.ipaddr,src_flow_data.port,src_flow_data.traffic,src_flow_data.time)values
+      <foreach collection="list" item="flieDataVo" index="index" separator=",">
+      (#{flieDataVo.ipaddr},#{flieDataVo.port},#{flieDataVo.traffic},DATE_ADD(#{flieDataVo.time}, INTERVAL -1 hour))
+      </foreach>
+    </insert>
+    
+    
+<select id="flowDataByDate" parameterType="java.lang.String" resultType="java.lang.String" >
+    select  distinct t.ipaddr from  src_flow_data t where date_format(t.time,'%Y-%m-%d')=#{dateParm}
+</select>
+
+
+    <select id="flowDataByIp"  resultType="java.lang.String">
+        select  distinct t.port from  src_flow_data t
+        where date_format(t.time,'%Y-%m-%d')=#{dateParm} and t.ipaddr=#{ipaddr}
+        and t.port not in
+        <foreach item="item" index="index" collection="delList" open="(" separator="," close=")">
+        #{item.user_port}
+        </foreach>
+    </select>
+
+    <select id="flowDatalist" resultType="com.example.socksdemo.model.FileDataVo">
+        select t.ipaddr,t.port,t.traffic,date_format(t.time,'%H') as time  from src_flow_data t
+          where date_format(t.time,'%Y-%m-%d')=#{dateParm}
+           and t.ipaddr=#{ipaddr}
+           and t.port=#{port}
+           order by t.time asc
+    </select>
+
+    <select id="dataCount" resultType="java.lang.Integer">
+  select count(*) from src_flow_data
+  where DATE_FORMAT(src_flow_data.time,'%Y-%m-%d')>=#{startdate}
+  and #{enddate}>=DATE_FORMAT(src_flow_data.time,'%Y-%m-%d')
+    </select>
+    
+    <delete id="deldataCount" >
+        delete from src_flow_data
+  where DATE_FORMAT(src_flow_data.time,'%Y-%m-%d')>=#{startdate}
+  and #{enddate}>=DATE_FORMAT(src_flow_data.time,'%Y-%m-%d')
+    </delete>
+
+    <insert id="insertFlowDataTmp" parameterType="java.lang.String" >
+        insert into src_flow_data_tmp select * from  src_flow_data
+           where date_format(src_flow_data.time,'%Y-%m-%d %H')=#{dateParm}
+
+    </insert>
+
+    <insert id="countFlowProcedure" parameterType="java.lang.String" statementType="CALLABLE">
+      {call count_flow(#{dateParm})}
+    </insert>
+
+    <delete id="delFlowDataTmp" >
+         DELETE from src_flow_data_tmp
+    </delete>
+
+</mapper>

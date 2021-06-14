@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" >
+<head>
+    <meta charset="UTF-8">
+    <title>历史信息查询</title>
+    <script src="/js/jquery.js"></script>
+</head>
+<body>
+<h4>按条件查询用户历史信息</h4>
+<br/>
+<div>
+    <form id="searchForm" method="post">
+   用户名： <input text=""  id="user_name"  name="user_name" >  用户id： <input text=""  id="user_id"  name="user_id" > 开始时间： <input text="" id="startdate" name="startdate" > 结束时间： <input text=""  id="enddate" name="enddate" >
+    ip：<input text="" id="resource_ip" name="resource_ip" > 端口：<input text=""  id="resource_port" name="resource_port" >
+</select>
+    </form>
+</div>
+<br/>
+<div>
+    <button  th:onclick="'javascript:search()'" id="searchButton"　 style="width: 100px; height: 35px;" >查询</button>
+    <button th:onclick="'javascript:reset()'" id="resetButton" style="width: 100px; height: 35px;">重置条件</button>
+    <button th:onclick="'javascript:index()'" id="indexButton" style="width: 100px; height: 35px;">返回首页</button>
+</div>
+<br/>
+<br/>
+<div>
+    <table border="1" cellspacing="0" id="tab">
+        <caption align="top">用户历史信息</caption>
+        <tr>
+            <th>历史表id</th>
+            <th>用户id</th>
+            <th>用户名</th>
+            <th>用户密码</th>
+            <th>开始时间</th>
+            <th>结束时间</th>
+            <th>资源ip</th>
+            <th>资源端口</th>
+            <th>资源加载时间</th>
+            <th>用户创建时间</th>
+            <th>操作类型</th>
+
+        </tr>
+
+    </table>
+
+</div>
+
+</body>
+<script language="javascript" type="text/javascript" >
+  function reset() {
+      $("#user_name").val("");
+      $("#startdate").val("");
+      $("#enddate").val("");
+      $("#resource_ip").val("");
+      $("#resource_port").val("");
+      $("#user_id").val("");
+
+  }  
+  function index() {
+      window.location.href="/indexController/index";
+  }
+  function search() {
+//      $("#searchForm").attr("action", "/indexController/queryUser");
+//      $("#searchForm").submit();
+      $("#tab").find("tr:not(:first)").remove();
+     var user_name= $("#user_name").val();
+     var startdate= $("#startdate").val();
+     var enddate=$("#enddate").val();
+     var resource_ip=$("#resource_ip").val();
+     var resource_port=$("#resource_port").val();
+      var user_id=$("#user_id").val();
+    if(user_name==""&&startdate==""&&enddate==""&& resource_ip==""&& resource_port==""&&user_id==""){
+        alert("至少输入一个查询条件！");
+        return false;
+    }
+      $.ajax({
+          type:"post",
+          url:"/indexController/queryHisInfo",
+          dataType:'json',
+          data: $("#searchForm").serialize(),
+          success:function (data) {
+
+              var str = "";//定义用于拼接的字符串
+                       for (var i = 0; i < data.length; i++) {
+                               //拼接表格的行和列
+                               str = "<tr><td>" + data[i].his_id + "</td><td>" + data[i].user_id + "</td><td>" + data[i].user_name + "</td><td>" + data[i].user_password + "</td>" +
+                                   "<td>" + data[i].startdate + "</td><td>" + data[i].enddate + "</td><td>" + data[i].resource_ip + "</td><td>" + data[i].resource_port + "</td>" +
+                                   "<td>" + data[i].resource_loadtime + "</td><td>" + data[i].user_creattime + "</td><td>" + data[i].remark_type + "</td></tr>";
+                              //追加到table中
+                               $("#tab").append(str);         }
+
+          },
+          error: function(){
+                              alert("ajax连接异常");
+                          }
+      })
+  }
+
+
+</script>
+</html>

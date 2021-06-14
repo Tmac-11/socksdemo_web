@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.socksdemo.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.example.socksdemo.model.UserVo">
+        <id column="user_id" jdbcType="INTEGER" property="user_id" />
+        <result column="user_name" jdbcType="VARCHAR" property="user_name" />
+        <result column="user_password" jdbcType="VARCHAR" property="user_password" />
+        <result column="startdate" jdbcType="DATE" property="startdate" />
+        <result column="enddate" jdbcType="DATE" property="enddate" />
+        <result column="resource_id" jdbcType="INTEGER" property="resource_id" />
+        <result column="user_creattime" jdbcType="TIMESTAMP" property="user_creattime" />
+        <result column="user_type" jdbcType="VARCHAR" property="user_type" />
+        <result column="user_rights" jdbcType="INTEGER" property="user_rights" />
+        <result column="user_code" jdbcType="VARCHAR" property="user_code" />
+    </resultMap>
+
+    <insert id="addUser" parameterType="com.example.socksdemo.model.UserVo" useGeneratedKeys="true" keyProperty="user_id">
+      insert into user_socks  (user_name,
+                                user_password,
+                                startdate,
+                                enddate,
+                                resource_id,
+                                user_creattime,
+                                user_type,
+                                user_code,
+                                user_rights)values
+                         (#{user_name},
+                          #{user_password},
+                          #{startdate},
+                          #{enddate},
+                          #{resource_id},
+                          #{user_creattime},
+                          #{user_type},
+                          #{user_code},
+                          #{user_rights}
+                                        )
+    </insert>
+    
+    <select id="userInfo"  resultType="com.example.socksdemo.model.UserInfo">
+
+        select u.*,r.resource_port,r.resource_ip,r.resource_state,r.resource_type,r.resource_json,r.resource_domain_name from user_socks u left join resource r on u.resource_id=r.resource_id
+
+    </select>
+
+    <select id="userInfoNum" parameterType="com.example.socksdemo.model.PageInfo" resultType="java.lang.Integer">
+        select COUNT(*) from(
+        select u.*,r.resource_port,r.resource_ip,r.resource_state,r.resource_type,r.resource_json,r.resource_domain_name from user_socks u left join resource r on u.resource_id=r.resource_id
+        )k
+    </select>
+
+
+    <select id="userFailure"  resultType="com.example.socksdemo.model.UserInfo">
+        select t.* from(
+        select u.*,r.resource_port,r.resource_ip,r.resource_state,r.resource_json,r.resource_domain_name from user_socks u left join resource r on u.resource_id=r.resource_id
+        )t where DATE_FORMAT(SYSDATE(),'%Y-%m-%d')>=t.enddate order by t.enddate desc
+    </select>
+    
+    <update id="updUser" parameterType="com.example.socksdemo.model.UserInfo">
+        update user_socks
+        <set>
+            <if test="startdate!=null">
+                user_socks.startdate=#{startdate} ,
+            </if>
+            <if test="enddate!=null">
+                user_socks.enddate=#{enddate},
+            </if>
+            <if test="user_password!=null and user_password!=''">
+                user_socks.user_password=#{user_password},
+            </if>
+            <if test="user_rights!=null and user_rights!=''">
+                user_socks.user_rights=#{user_rights},
+            </if>
+            <if test="user_name!=null and user_name!=''">
+                user_socks.user_name=#{user_name},
+            </if>
+            <if test="user_type!=null and user_type!=''">
+                user_socks.user_type=#{user_type}
+            </if>
+
+        </set>
+        where user_socks.user_id=#{user_id}
+
+    </update>
+
+    <delete id="delUser" parameterType="java.lang.Integer">
+        delete from user_socks where user_socks.user_id=#{user_id}
+    </delete>
+
+    <select id="queryUser" parameterType="com.example.socksdemo.model.SearchVo" resultType="com.example.socksdemo.model.UserInfo">
+          select t.* from(
+         select u.*,r.resource_port,r.resource_ip,r.resource_state,r.resource_loadtime,resource_type,resource_domain_name,resource_json from user_socks u left join resource r on u.resource_id=r.resource_id)t
+         where 1=1
+         <if test="user_name!=null and user_name!=''">
+             and t.user_name like concat('%',#{user_name},'%')
+         </if>
+         <if test="resource_ip!=null and resource_ip!=''">
+             and t.resource_ip like concat('%',#{resource_ip},'%')
+         </if>
+        <if test='resource_state!=null and resource_state!="" and resource_state!="2" '>
+            and t.resource_state =#{resource_state}
+        </if>
+        <if test="resource_port!=null and resource_port!=''">
+            and t.resource_port like concat('%',#{resource_port},'%')
+        </if>
+        <if test="startdate!=null">
+            and t.startdate=#{startdate}
+        </if>
+        <if test="enddate!=null">
+            and t.enddate=#{enddate}
+        </if>
+        <!--
+        <if test="resource_type!=null and resource_type!=''">
+            and t.resource_type like concat('%',#{resource_type},'%')
+        </if>
+        <if test="key_type!=null and key_type!=''">
+            and t.key_type like concat('%',#{key_type},'%')
+        </if>
+        -->
+    </select>
+    
+    <select id="queryByid" parameterType="java.lang.Integer" resultType="com.example.socksdemo.model.UserInfo">
+ select t.* from(
+         select u.*,r.resource_port,r.resource_ip,r.resource_state,r.resource_loadtime,r.resource_type,r.resource_json,r.resource_domain_name from user_socks u left join resource r on u.resource_id=r.resource_id)t
+         where t.user_id=#{user_id}
+
+    </select>
+
+
+    <select id="userTips" parameterType="com.example.socksdemo.model.SearchVo"  resultType="com.example.socksdemo.model.UserInfo">
+        select t.* from(
+        select u.*,r.resource_port,r.resource_ip,r.resource_state,r.resource_type,r.resource_json,r.resource_loadtime,r.resource_domain_name from user_socks u left join resource r on u.resource_id=r.resource_id
+        )t where t.enddate>#{startdate} and t.enddate &lt;=#{enddate}
+        order by t.enddate desc
+    </select>
+    
+    <select id="queryByResid"  resultType="java.lang.String">
+        select  u.user_name  from user_socks u
+          where u.resource_id=(select r.resource_id from resource r where r.resource_ip=#{ipaddr} and r.resource_port=#{port} )
+          
+    </select>
+    
+    
+    <select id="queryByCode"   resultType="com.example.socksdemo.model.UserInfo">
+        select u.* from user_socks u where u.user_id>=26;
+    </select>
+    <update id="updUserCode" parameterType="com.example.socksdemo.model.UserInfo">
+        update user_socks
+        <set>
+            <if test="startdate!=null">
+                user_socks.user_code=#{user_code}
+            </if>
+
+        </set>
+        where user_socks.user_id=#{user_id}
+
+    </update>
+</mapper>

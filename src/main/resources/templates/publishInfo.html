@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:>
+<head>
+    <meta charset="UTF-8">
+    <title>设置公告</title>
+    <script src="/js/jquery.js"></script>
+</head>
+<body >
+设置公告信息
+<div th:object="${device}">
+    <form action="" method="post" id="form">
+    <p>设备id： <input th:value="*{device_id}" id="device_id" name="device_id" readonly="readonly" ></p>
+    <p>设备ip：<input th:value="*{device_ip}" id="device_ip" name="device_ip"></p>
+    <p>设备域名：<input th:value="*{device_domain_name}" id="device_domain_name" name="device_domain_name"></p>
+    <input th:value="*{device_state}" id="device_state" name="device_state" hidden="hidden">
+    <p>设备状态：<select th:id="select">
+        <option value="1">有效</option>
+        <option value="0">无效</option>
+    </select>
+    </p>
+    </form>
+    <div align="left" style="float:left">
+        <button  th:onclick="'javascript:update()'" id="leftButton"　 >确认</button>
+        <button th:onclick="'javascript:cancel()'" id="rightButton">取消</button>
+    </div>
+
+
+
+
+</div>
+<script language="javascript" type="text/javascript" >
+    window.onload=function init() {
+
+        var vals=$("#device_state").val();//后台传回来的值
+        $("#select option[value = '"+vals+"']").attr("selected",true);
+    }
+function update() {
+
+        var ip=$("#device_ip").val();
+    var device_domain_name=$("#device_domain_name").val();
+
+        if(ip==""||device_domain_name==""){
+           alert("请输入域名或者ip值！");
+           return ;
+        }else{
+            var select=$("#select").val();
+            $("#device_state").val(select);
+            var device_state=$("#device_state").val();
+            if(device_state==0){
+                alert("编辑此ip失效，会导致使用该ip用户资源失效，是否继续？")
+            }
+            $("#form").attr("action", "/deviceController/updateDevice");
+            $("#form").submit();
+
+        }
+    
+}
+
+function cancel() {
+    window.location.href="/indexController/index";
+}
+    
+</script>
+</body>
+</html>

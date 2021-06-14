@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" >
+
+<head>
+    <meta charset="UTF-8">
+    <title>用户流量统计</title>
+    <script src="/js/jquery-1.8.3.min.js"></script>
+<!--
+    <script  type="text/javascript" src="/js/MultipleSelect.js">
+    </script>
+    <link rel="stylesheet" type="text/css" href="/css/MultipleSelect.css">
+    -->
+    <script src="https://echarts.baidu.com/build/dist/echarts-all.js"></script>
+
+    <script type="text/javascript" src="/js/bootstrap-select.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-select.css">
+
+    <link href="https://libs.baidu.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://libs.baidu.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+<p style="margin-left: 10px;font-size:16px" >用户流量统计</p>
+<div style="margin-left: 10px;font-size:15px">
+    <form id="searchForm" method="post">
+        开始时间：<input type="date" id="start" name="start">  &nbsp;&nbsp;  结束时间：<input type="date" id="end" name="end">
+        <br/><br/>设备：<select id="deviceName" name="deviceName" class="selectpicker bla bla bli"  data-live-search="true" onchange="selectDevice()"></select>
+        　&nbsp;用户：<select id="userName" name="userName"  class="selectpicker bla bla bli" multiple data-live-search="true"></select>
+        <button  type="button" th:onclick="'javascript:sure()'" id="sureButton"　 style="width: 100px; height: 30px;" >确定选中</button>
+        <br/>查询用户：<textarea  id="queryUserShow" name="queryUserShow"  readonly="readonly" style="width: 400px;height: 80px; border:solid 1px;"></textarea>
+        <br/><input type="input" id="queryUser" name="queryUser" style="width: 400px;height: 30px;" hidden="hidden">
+        <br/>统计类型：　<label><input name="type" type="radio"  value="month" checked/> 月</label>&nbsp;&nbsp;<label><input name="type" type="radio" value="date" /> 天</label>
+        &nbsp;&nbsp;<label><input name="type" type="radio" value="hour" /> 时</label>
+    </form>
+</div>
+
+<div  style="margin-left: 10px;font-size:15px">
+    <button  type="button" th:onclick="'javascript:search()'" id="searchButton"　 style="width: 100px; height: 35px;" >统计查询</button>
+    &nbsp;&nbsp;<button  type="button" th:onclick="'javascript:resets()'" id="resetButton"　 style="width: 100px; height: 35px;" >重置条件</button>
+</div>
+<br/>
+<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" class="main-charts" style="margin-left: 10px;height: 350px; width:800px; border: 1px solid #ccc; padding: 10px;"></div>
+
+<script language="javascript" type="text/javascript" th:inline="javascript" >
+    window.onload=function init() {
+        var devicelist=[[${DeviceList}]];
+        var select_ip = document.getElementById("deviceName");
+        select_ip.options.length=0;
+        $('.selectpicker').selectpicker({
+            'selectedText': 'cat'
+        });
+
+        var ipOpt = document.createElement('option');
+        ipOpt.innerText ="--请选择--";
+        ipOpt.value ="" ;
+        select_ip.appendChild(ipOpt);
+        for(var i=0;i<devicelist.length;i++){
+
+            var ipOpt = document.createElement('option');
+            ipOpt.innerText =devicelist[i].device_domain_name;
+            ipOpt.value = devicelist[i].device_ip;
+            select_ip.appendChild(ipOpt);
+
+        }
+
+       $("#deviceName").selectpicker("refresh");
+        //$("#deviceName").selectpicker("render");
+
+    }
+
+    function judgeTime(start,end){
+        var start = start.replace("/-/g", "/");//时间转换
+        var end = end.replace("/-/g", "/");//时间转换
+        var startTime=new Date(start);
+        var endTime=new Date(end);
+
+        return startTime>endTime?true:false;
+    }
+
+    function search() {
+
+        var startmonth=  $("#start").val();
+        var endmonth=  $("#end").val();
+        var queryUserShow=  $("#queryUserShow").val();
+        var type=$('input:radio:checked').val();
+
+        if(startmonth==""||endmonth==""||queryUserShow==""){
+            alert("没有输入查询时间或者查询用户！");
+        }else {
+            if(judgeTime(startmonth,endmonth)){
+                alert("开始时间大于结束时间！");
+                return flase;
+            }
+            if(type=="hour"){
+               if(startmonth!=endmonth){
+                   alert("统计类型为小时，开始和结束时间必须是同一天！");
+                   return flase;
+               }
+            }
+
+            $.ajax({
+                type: "post",
+                url: "/flowShowController/userListFlow",
+                dataType: "json",
+                data: $("#searchForm").serialize(),
+                success: function (jsondata) {
+
+                    userChart(jsondata);
+
+                },
+                error: function (jsondata) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+
+                }
+            });
+
+        }
+
+    }
+
+    function selectDevice() {
+        var select_type= $("#deviceName").val();
+        var userName = document.getElementById("userName");
+
+        if(select_type==''){
+            userName.options.length=0;
+            $("#userName").selectpicker("refresh");
+            $("#userName").selectpicker("render");
+          return false;
+
+        }else {
+
+            $.ajax({
+                type:"post",
+                dataType: "json",
+                url: "/flowShowController/userList?deviceName="+select_type,
+                success:function (data) {
+
+                    userName.options.length=0;
+                    for(var i=0;i<data.length;i++){
+
+                        $("#userName").append("<option value='"+data[i].resource_port+"'>"+data[i].user_name+"</option>");
+                    }
+
+                    $("#userName").selectpicker("refresh");
+                   // $("#userName").selectpicker("render");
+
+
+
+                }
+            })
+
+
+        }
+
+    }
+
+    function userChart(jsondata){
+    var objectlist= jsondata.objectList;
+    var xAxisArr = jsondata.xAxisArr;
+        var myChart = echarts.init(document.getElementById("main"));
+        var dataArr=[];
+        var seriersArr=[];
+       // alert(jsondata.objectList.length)
+        for(var i=0;i<objectlist.length;i++){
+            seriersArr.push({
+                name:objectlist[i].userName,
+                type:'line',
+                symbol:'none',
+                data: objectlist[i].jsonArr,
+                markPoint : {
+                    data : [
+                        {type : 'max', name: '最大值'},
+                        {type : 'min', name: '最小值'}
+                    ]
+                },
+                markLine : {
+                    data : [
+                        {type : 'average', name : '平均值'}
+                    ]
+                }
+            });
+
+            dataArr[i]=objectlist[i].userName;
+        }
+
+
+
+        var option= {
+            title : {
+                text: '',
+                subtext: '用户流量统计'
+
+            },
+            tooltip : {
+                trigger: 'axis',
+            },
+            legend: {
+                data:dataArr,
+            },
+            toolbox: {
+                show : true,
+                orient:'vertical',
+                feature : {
+                    mark : {show: true},
+                    dataView : {show: true, readOnly: false},
+                    magicType : {show: true, type: ['line', 'bar']},
+                    restore : {show: true},
+                    saveAsImage : {show: true}
+                }
+            },
+
+            calculable : true,
+            dataZoom : {
+                show : true,
+                realtime : true,
+                //滑动条y轴
+
+                height: 20,
+                start : 0,
+                end : 100
+            },
+            xAxis : [
+                {
+                    type : 'category',
+                    boundaryGap : false,
+                    data :xAxisArr
+                }
+            ],
+            yAxis : [
+                {
+                    type : 'value',
+                    axisLabel : {
+                        formatter: '{value} MB'
+                    }
+                },
+
+            ],
+            series :seriersArr
+        };
+
+        myChart.setOption(option);
+
+    }
+
+
+    function sure() {
+        var deviceNameValue= $("#deviceName").val();
+        var deviceNameText= $("#deviceName").find("option:selected").text();
+
+// 获取到下拉框说所有选中项
+        var checkParam = $('#userName').find('option:selected');
+        if(checkParam.length==0){
+            alert("没有选中查询用户！")
+            return false;
+        }
+// 选中的ID集合
+        var checkId = [];
+// 选中的文本值集合
+        var checkText = [];
+        for (var i=0;i<checkParam.length;i++) {
+            checkId.push(deviceNameValue+"/"+checkParam[i].value);
+        }
+        for (var i=0;i<checkParam.length;i++) {
+            checkText.push(deviceNameText+"/"+checkParam[i].textContent+" ");
+        }
+// 数组转字符串
+        var ids = checkId.join(',');
+        var  text = checkText.join('；');
+        ids= ids+",";
+        text =text+"；";
+//        alert(ids);
+//        alert(text);
+
+        var queryUserShow=$("#queryUserShow").val();
+        var show =queryUserShow.split("；");
+
+        if(queryUserShow==""){
+            $("#queryUserShow").val(queryUserShow+text);
+        }else{
+           for(var i=0;i<show.length;i++){
+                 for(var k=0;k<checkText.length;k++){
+                      if(show[i]==checkText[k]){
+                          alert("已经选中此用户了");
+                         return false;
+                      }
+                 }
+
+           }
+        }
+
+        $("#queryUserShow").val(queryUserShow+text);
+        var queryUser=$("#queryUser").val();
+        $("#queryUser").val(queryUser+ids);
+
+    }
+    
+    
+    function resets(){
+        $("#start").val("");
+        $("#end").val("");
+        $("#queryUserShow").val("");
+        $("#queryUser").val("");
+//       var ops= $("#deviceName").options;
+//        var deviceName = document.getElementById("deviceName");
+//        deviceName.options.length=0;
+
+        $('#deviceName').selectpicker('val',['noneSelectedText']);//回到初始状态
+        $('#userName').selectpicker('val',['noneSelectedText']);//回到初始状态
+
+        $("#userName").selectpicker("refresh");
+        $("#deviceName").selectpicker("refresh");
+        $('input:radio:first').attr('checked', 'checked');
+    }
+
+
+</script>
+</body>
+</html>
+

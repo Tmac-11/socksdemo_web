@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" >
+<head>
+    <meta charset="UTF-8">
+    <title>按条件查询用户信息</title>
+    <script src="/js/jquery.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/fenye.css">
+</head>
+<body>
+<h4>按条件查询用户信息</h4>
+<br/>
+<div>
+    <form id="searchForm" method="post">
+   用户名： <input text=""  id="user_name"  name="user_name" > 开始时间： <input text="" id="startdate" name="startdate" > 结束时间： <input text=""  id="enddate" name="enddate" >
+    ip：<input text="" id="resource_ip" name="resource_ip" > 端口：<input text=""  id="resource_port" name="resource_port" >
+    用户状态：<select id="resource_state" name="resource_state">
+    <option value="2">所有</option>
+    <option value="1">有效</option>
+    <option value="0">无效</option>
+
+</select>
+    </form>
+</div>
+<br/>
+<div>
+    <button  th:onclick="'javascript:search()'" id="searchButton"　 style="width: 100px; height: 35px;" >查询</button>
+    <button th:onclick="'javascript:reset()'" id="resetButton" style="width: 100px; height: 35px;">重置条件</button>
+    <button th:onclick="'javascript:index()'" id="indexButton" style="width: 100px; height: 35px;">返回首页</button>
+</div>
+<br/>
+<br/>
+<div>
+    <table border="1" cellspacing="0">
+        <caption align="top">用户列表</caption>
+        <tr>
+            <th>用户id</th>
+            <th>用户名</th>
+            <th>用户密码</th>
+            <th>开始时间</th>
+            <th>结束时间</th>
+            <th>资源ip</th>
+            <th>资源域名</th>
+            <th>资源端口</th>
+            <th>是否失效</th>
+            <th>资源类型</th>
+            <th>用户创建时间</th>
+            <th>操作</th>
+        </tr>
+        <tr  th:each="user:${UserList}" >
+            <td th:text="${user.user_id}"></td>
+            <td th:text="${user.user_name}"></td>
+            <td th:text="${user.user_password}"></td>
+            <td th:text="${user.startdate}"></td>
+            <td th:text="${user.enddate}"></td>
+            <td th:text="${user.resource_ip}"></td>
+            <td th:text="${user.resource_domain_name}"></td>
+            <td th:text="${user.resource_port}"></td>
+           <!-- <td th:text="${user.resouce_code}"></td>-->
+            <td th:if="${user.resource_state} eq '1'" ><img style="width: 40px;height: 25px;" th:src="@{/img/online.jpg}"/></td>
+            <td  th:if="${user.resource_state} eq '0'"><img style="width: 40px;height: 25px;" th:src="@{/img/offline.jpg}"/></td>
+             <td th:text="${user.resource_type}"></td>
+             <td th:text="${user.user_creattime}"></td>
+             <td th:text="${user.resource_json}"  hidden="hidden"></td>
+            <td th:text="${user.user_rights}"  hidden="hidden"></td>
+            <td th:text="${user.user_code}"  hidden="hidden"></td>
+            <td th:text="${user.user_type}"  hidden="hidden"></td>
+             <td>
+                 <a th:href="@{/resourceController/resourceEdit(user_id=${user.user_id},user_name=${user.user_name},startdate=${user.startdate},enddate=${user.enddate},user_password=${user.user_password},resource_id=${user.resource_id},
+                 resource_ip=${user.resource_ip},resource_port=${user.resource_port},resource_state=${user.resource_state},user_creattime=${#temporals.format(user.user_creattime, 'yyyy-MM-dd HH:mm:ss')},resource_type=${user.resource_type},
+                 resource_domain_name=${user.resource_domain_name},resource_json=${user.resource_json},
+                 user_code=${user.user_code},user_rights=${user.user_rights},user_type=${user.user_type})}"   >分配新资源</a>
+
+                 <a th:href="@{/indexController/qrcode(user_id=${user.user_id},user_name=${user.user_name},startdate=${user.startdate},enddate=${user.enddate},user_password=${user.user_password},resource_id=${user.resource_id},
+                 resource_ip=${user.resource_ip},resource_port=${user.resource_port},resource_state=${user.resource_state},user_creattime=${#temporals.format(user.user_creattime, 'yyyy-MM-dd HH:mm:ss')},
+                 resource_type=${user.resource_type},resource_domain_name=${user.resource_domain_name},resource_json=${user.resource_json},
+                 user_code=${user.user_code},user_rights=${user.user_rights},user_type=${user.user_type})}"   >查看二维码</a>
+
+
+                 <a th:href="@{/indexController/userEdit(user_id=${user.user_id},user_name=${user.user_name},startdate=${user.startdate},enddate=${user.enddate},user_password=${user.user_password},resource_id=${user.resource_id},
+                 resource_ip=${user.resource_ip},resource_port=${user.resource_port},resource_state=${user.resource_state},user_creattime=${#temporals.format(user.user_creattime, 'yyyy-MM-dd HH:mm:ss')},resource_type=${user.resource_type},
+                 resource_domain_name=${user.resource_domain_name},resource_json=${user.resource_json},
+                 user_code=${user.user_code},user_rights=${user.user_rights},user_type=${user.user_type})}"   >编辑</a>
+
+                 <a  href=""  th:onclick="'javascript:delteUser(\''+${user.user_id}+'\',\''+${user.resource_id}+'\')'"  th:name="'delUser'+${user.user_id}+''">删除用户</a>
+
+
+
+                 <a href=""   th:name="'failuser'+${user.user_id}+''"  th:if=" ${user.resource_state} eq '1'" th:onclick="'javascript:failUser(\''+${user.user_id}+'\',\''+${user.resource_id}+'\')'">失效</a>
+             </td>
+         </tr>
+     </table>
+
+ </div>
+
+
+ </body>
+ <script language="javascript" type="text/javascript" >
+
+
+   function reset() {
+       $("#user_name").val("");
+       $("#startdate").val("");
+       $("#enddate").val("");
+       $("#resource_ip").val("");
+       $("#resource_port").val("");
+       $("#resource_state option[value = 'null']").attr("selected",true);
+   }
+   function index() {
+       window.location.href="/indexController/index";
+   }
+   function search() {
+       $("#searchForm").attr("action", "/indexController/queryUser");
+       $("#searchForm").submit();
+   }
+   function checkstate(state) {
+       var state=state;
+       if("1"==state){
+           var bool=confirm("是否给有效用户重新分配资源？");
+           if(bool!=true){
+               return false;
+           }
+       }
+   }
+   function failUser(userid,resid) {
+    var a= confirm("是否使该用户失效？");
+    var url="/indexController/failUser?user_id="+userid+"&&res_id="+resid;
+    var name="failuser"+userid;
+    if(a){
+       $("a[name="+name+"]").attr("href",url);
+    }
+   }
+
+   function delteUser(user_id,resource_id) {
+       var id=user_id;
+       var rsid=resource_id;
+       var state='state'+id;
+       var resource_sate= $("td[name="+state+"]").text();
+       // alert(resource_sate)
+       var url="/indexController/userinfoDel?user_id="+id+"&&resource_id="+rsid+"&&resource_sate="+resource_sate;
+       var aaa = 'delUser'+ id;
+       var a=confirm("确定删除此用户吗？");
+       if(a==true) {
+           console.log("aa");
+           $("a[name="+aaa+"]").attr("href",url);
+
+       }
+
+   }
+
+ </script>
+ </html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" >
+
+<head>
+    <meta charset="UTF-8">
+    <title>设备流量统计</title>
+    <script src="/js/jquery-1.8.3.min.js"></script>
+
+    <script src="https://echarts.baidu.com/build/dist/echarts-all.js"></script>
+
+    <script type="text/javascript" src="/js/bootstrap-select.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-select.css">
+
+    <link href="https://libs.baidu.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://libs.baidu.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+<p style="margin-left: 10px;font-size:16px" >设备流量统计</p>
+<div style="margin-left: 10px;font-size:15px">
+    <form id="searchForm" method="post">
+        开始月份：<input type="date" id="startmonth" name="startmonth">  &nbsp;&nbsp;  结束月份：<input type="date" id="endmonth" name="endmonth">
+        &nbsp;&nbsp;选择设备：<select id="deviceName" name="deviceName" class="selectpicker bla bla bli"  data-live-search="true" multiple>
+        　</select>
+        <br/><br/>统计类型：　<label><input name="type" type="radio"  value="month" checked/> 月</label>&nbsp;&nbsp;<label><input name="type" type="radio" value="date" /> 天</label>
+
+    </form>
+</div>
+<br/>
+<div style="margin-left: 10px;font-size:15px">
+    <button  type="button" th:onclick="'javascript:search()'" id="searchButton"　 style="width: 100px; height: 35px;" >统计查询</button>
+    &nbsp;&nbsp;<button  type="button" th:onclick="'javascript:resets()'" id="resetButton"　 style="width: 100px; height: 35px;" >重置条件</button>
+
+</div>
+<br/>
+<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" class="main-charts" style="margin-left: 10px;height: 350px; width:800px; border: 1px solid #ccc; padding: 10px;"></div>
+<script language="javascript" type="text/javascript" th:inline="javascript" >
+    window.onload=function init() {
+
+
+        var devicelist=[[${DeviceList}]];
+        var select_ip = document.getElementById("deviceName");
+        select_ip.options.length=0;
+        var dataArr=[];
+        $('.selectpicker').selectpicker({
+            'selectedText': 'cat'
+        });
+//        var ipOpt = document.createElement('option');
+//        ipOpt.innerText ="--请选择--";
+//        ipOpt.value ="" ;
+//        select_ip.appendChild(ipOpt);
+        for(var i=0;i<devicelist.length;i++){
+
+            var ipOpt = document.createElement('option');
+            ipOpt.innerText =devicelist[i].device_domain_name;
+            ipOpt.value = devicelist[i].device_ip;
+            select_ip.appendChild(ipOpt);
+
+        }
+
+        $("#deviceName").selectpicker("refresh");
+
+
+    }
+
+    function judgeTime(start,end){
+        var start = start.replace("/-/g", "/");//时间转换
+        var end = end.replace("/-/g", "/");//时间转换
+        var startTime=new Date(start);
+        var endTime=new Date(end);
+
+        return startTime>endTime?true:false;
+    }
+
+    function search() {
+
+        var startmonth=  $("#startmonth").val();
+        var endmonth=  $("#endmonth").val();
+        var checkParam = $('#deviceName').find('option:selected');
+        if(checkParam.length==0){
+            alert("没有选中查询设备！")
+            return false;
+        }
+
+        if(startmonth==""||endmonth==""){
+            alert("没有输入时间范围！");
+        }else {
+            if(judgeTime(startmonth,endmonth)){
+                alert("开始时间大于结束时间！");
+                return flase;
+            }
+            $.ajax({
+                type: "post",
+                url: "/flowShowController/deviceListFlow",
+                dataType: "json",
+                data: $("#searchForm").serialize(),
+                success: function (jsondata) {
+
+                    deviceChart(jsondata);
+
+                },
+                error: function (jsondata) {
+                    //请求失败时执行该函数
+                    alert("图表请求数据失败!");
+
+                }
+            });
+
+        }
+
+    }
+
+    function deviceChart(jsondata){
+        var list=jsondata.objectList;
+        var myChart = echarts.init(document.getElementById("main"));
+        var dataArr=[];
+        var seriersArr=[];
+        for(var i=0;i<list.length;i++){
+            seriersArr.push({
+                name:list[i].ipName,
+                type:'line',
+                symbol:'none',
+                data: list[i].jsonArr,
+                markPoint : {
+                    data : [
+                        {type : 'max', name: '最大值'},
+                        {type : 'min', name: '最小值'}
+                    ]
+                },
+                markLine : {
+                    data : [
+                        {type : 'average', name : '平均值'}
+                    ]
+                }
+            });
+
+            dataArr[i]=list[i].ipName;
+
+        }
+
+
+
+        var option= {
+            title : {
+                text: '',
+                subtext: '设备流量统计'
+
+            },
+            tooltip : {
+                trigger: 'axis',
+            },
+            legend: {
+                data:dataArr,
+            },
+            toolbox: {
+                show : true,
+                orient:'vertical',
+                feature : {
+                    mark : {show: true},
+                    dataView : {show: true, readOnly: false},
+                    magicType : {show: true, type: ['line', 'bar']},
+                    restore : {show: true},
+                    saveAsImage : {show: true}
+                }
+            },
+
+            calculable : true,
+            dataZoom : {
+                show : true,
+                realtime : true,
+                //滑动条y轴
+
+                height: 20,
+                start : 0,
+                end : 100
+            },
+            xAxis : [
+                {
+                    type : 'category',
+                    boundaryGap : false,
+                    data :jsondata.xAxisArr
+                }
+            ],
+            yAxis : [
+                {
+                    type : 'value',
+                    axisLabel : {
+                        formatter: '{value} MB'
+                    }
+                },
+
+            ],
+            series :seriersArr
+        };
+
+        myChart.setOption(option);
+
+    }
+
+
+    function resets(){
+        $("#startmonth").val("");
+        $("#endmonth").val("");
+
+        $('#deviceName').selectpicker('val',['noneSelectedText']);//回到初始状态
+        //手动刷新
+        //document.getElementById("deviceName").options.selectedIndex = -1;
+        $("#deviceName").selectpicker("refresh");
+        $('input:radio:first').attr('checked', 'checked');
+    }
+
+
+</script>
+</body>
+</html>
+

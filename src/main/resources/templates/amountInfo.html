@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" >
+<head>
+    <meta charset="UTF-8">
+    <title>按条件查询用户帐单</title>
+    <script src="/js/jquery.js"></script>
+</head>
+<body>
+<h4>按条件查询用户帐单</h4>
+<br/>
+<div>
+    <form id="searchForm" method="post">
+  　用户名： <input text=""  id="user_name"  name="user_name" >
+    &nbsp;&nbsp;&nbsp;帐单时间范围: <input text=""  id="start"  name="start" > —
+        <input text=""  id="end"  name="end" >
+
+
+</select>
+    </form>
+</div>
+<br/>
+<div>
+    <button  th:onclick="'javascript:search()'" id="searchButton"　 style="width: 100px; height: 35px;" >查询</button>
+    <button th:onclick="'javascript:reset()'" id="resetButton" style="width: 100px; height: 35px;">重置条件</button>
+    <button th:onclick="'javascript:ex_exel()'" id="exButton" style="width: 100px; height: 35px;">帐单导出</button>
+    <button th:onclick="'javascript:index()'" id="indexButton" style="width: 100px; height: 35px;">返回首页</button>
+</div>
+<br/>
+<br/>
+<div>
+    <table border="1" cellspacing="0">
+        <caption align="top">信息列表</caption>
+        <tr>
+            <th>用户名</th>
+            <th>金额</th>
+            <th>帐单类型</th>
+            <th>费用时间</th>
+            <th>创建时间</th>
+            <th>操作</th>
+        </tr>
+        <tr  th:each="user:${amountList}" >
+            <td th:text="${user.user_name}"></td>
+            <td th:text="${user.user_amount}"></td>
+            <td th:text="${user.amount_type}"></td>
+            <td th:text="${user.amount_date}"></td>
+            <td th:text="${user.amount_creattime}"></td>
+            <td th:text="${user.amount_id}"  hidden="hidden"></td>
+            <td>
+
+                <a th:href="@{/amountController/edit(amount_id=${user.amount_id},user_name=${user.user_name},user_amount=${user.user_amount},amount_type=${user.amount_type},amount_date=${user.amount_date},amount_creattime=${user.amount_creattime})}"   >编辑</a>
+
+                <a  href=""  th:onclick="'javascript:delteUser(\''+${user.amount_id}+'\')'"  th:name="'delUser'+${user.amount_id}+''">删除</a>
+
+            </td>
+        </tr>
+    </table>
+
+</div>
+
+</body>
+<script language="javascript" type="text/javascript" >
+  function reset() {
+      $("#user_name").val("");
+      $("#start").val("");
+      $("#end").val("");
+
+
+  }  
+  function index() {
+      window.location.href="/indexController/index";
+  }
+  function search() {
+      $("#searchForm").attr("action", "/amountController/querylist");
+      $("#searchForm").submit();
+  }
+
+
+
+  function delteUser(amount_id) {
+      var id=amount_id;
+      var url="/amountController/delInfo?amount_id="+id;
+      var aaa = 'delUser'+ id;
+      var a=confirm("确定删除此条帐单吗？");
+      if(a==true) {
+          $("a[name="+aaa+"]").attr("href",url);
+
+      }
+
+  }
+  function ex_exel() {
+      var dateFormat =/^(\d{4})-(\d{2})-(\d{2})$/;
+   var start=  $("#start").val();
+    var end = $("#end").val();
+    if(start==""||end==""){
+      alert("请填写导出帐单时间范围！")
+    }else{
+
+        if(dateFormat.test(start)&&dateFormat.test(end)){
+            $("#searchForm").attr("action", "/amountController/excel");
+            $("#searchForm").submit();
+        }else{
+            alert("输入正确的日期格式!如：2020-01-01");
+            return false;
+        }
+
+
+
+
+    }
+
+
+  }
+
+
+    
+
+
+</script>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" >
+<head>
+    <meta charset="UTF-8">
+    <title>socksweb后台管理首页</title>
+    <script src="/js/jquery.js"></script>
+</head>
+<body>
+socksweb后台管理
+<div data-th-fragment="header">
+    <h3>菜单</h3>
+    <a href="/indexController/adduserhtml">新增用户</a>
+    <br/>
+    <a href="/deviceController/addDeviceHtml">新增设备</a>
+    <br/>
+    <a href="/indexController/userInfoHtml">用户信息详细查询</a>
+    <br/>
+    <!-- <a href="/indexController/publishHtml">设置公告</a>
+     <br/>-->
+     <!--
+     <a href="/flowShowController/deviceFlow">设备流量统计</a>
+     <br/>
+     <a href="/flowShowController/userFlow">用户流量统计</a>
+     <br/>
+
+     <a href="/amountController/amountHtml">查看帐单</a>
+     <br/>
+     <a href="/indexController/hisInfoHtml">历史信息查询</a>
+     <br/>
+     <a href="/indexController/logHtml">查看日志文件</a>
+  -->
+
+
+</div>
+<div>
+    <br/>
+    <br/>
+    <br/>
+</div>
+<div>
+    <table border="1" cellspacing="0">
+    <caption align="top">已有设备列表</caption>
+        <tr>
+            <th>设备id</th>
+            <th>设备ip</th>
+            <th>设备域名</th>
+            <th>设备状态</th>
+            <th>设备人数</th>
+            <th>操作</th>
+        </tr>
+        <tr  th:each="device:${DeviceList}" >
+            <td th:text="${device.device_id}" id="device_id" name="device_id"></td>
+            <td th:text="${device.device_ip}" id="device_ip"></td>
+            <td th:text="${device.device_domain_name}" id="device_domain_name"></td>
+            <td th:text="${device.state_code}" id="state_code"></td>
+            <td th:text="${device.device_count}" id="device_count"></td>
+            <td th:text="${device.device_state}" id="device_state" hidden="hidden"></td>
+            <td >
+                <a th:href="@{/deviceController/edit(device_id=${device.device_id},device_ip=${device.device_ip},device_state=${device.device_state},device_domain_name=${device.device_domain_name})}">编辑设备</a>
+                <a  href="" th:onclick="'javascript:delteDevice('+${device.device_id}+')'"  th:name="'delDevice'+${device.device_id}+''">删除设备</a>
+            </td>
+
+        </tr>
+    </table>
+
+</div>
+<div>
+    <br/>
+    <br/>
+    <br/>
+</div>
+<div>
+
+    <table border="1" cellspacing="0" id="usertable">
+        <caption align="top" ></caption>
+        <tr>
+            <th>用户id</th>
+            <th>用户名</th>
+            <th>开始时间</th>
+            <th>结束时间</th>
+            <th>资源ip</th>
+            <th>资源域名</th>
+            <th>资源端口</th>
+            <th>资源是否失效</th>
+            <th>用户创建时间</th>
+            <th>操作</th>
+        </tr>
+        <tr  th:each="user:${UserList}" >
+            <td th:text="${user.user_id}"></td>
+            <td th:text="${user.user_name}"></td>
+            <td th:text="${user.startdate}"></td>
+            <td th:text="${user.enddate}"></td>
+            <td th:text="${user.resource_ip}"></td>
+            <td th:text="${user.resource_domain_name}"></td>
+            <td th:text="${user.resource_port}"></td>
+            <td th:text="${user.resouce_code}"></td>
+            <td th:text="${#temporals.format(user.user_creattime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td th:text="${user.resource_state}" hidden="hidden" th:name="'state'+${user.user_id}+''"></td>
+            <td>
+                <a th:href="@{/resourceController/resourceEdit(user_id=${user.user_id},user_name=${user.user_name},startdate=${user.startdate},enddate=${user.enddate},user_password=${user.user_password},resource_id=${user.resource_id},
+                resource_ip=${user.resource_ip},resource_port=${user.resource_port},resource_state=${user.resource_state},user_creattime=${#temporals.format(user.user_creattime, 'yyyy-MM-dd HH:mm:ss')})}">分配新资源</a>
+                <a  href=""  th:onclick="'javascript:delteUser(\''+${user.user_id}+'\',\''+${user.resource_id}+'\')'"  th:name="'delUser'+${user.user_id}+''">删除用户</a>
+            </td>
+        </tr>
+    </table>
+    <input id="today" type="hidden" th:value="${today}" />
+</div>
+<script language="javascript" type="text/javascript" >
+window.onload=function init () {
+    var today=$("#today").val();
+    //设置table标题
+    var x=document.getElementById('usertable').createCaption();
+    x.innerHTML=today+"过期用户列表";
+
+}
+
+function delteDevice(device_id){
+    var id=device_id;
+    var url="/deviceController/delete?device_id="+id;
+    var aaa = 'delDevice'+ id;
+    var a=confirm("确定删除此设备吗？");
+    if(a==true) {
+        console.log("aa");
+        $("a[name="+aaa+"]").attr("href",url);
+
+    }
+
+}
+
+function delteUser(user_id,resource_id) {
+    var id=user_id;
+    var rsid=resource_id;
+    var state='state'+id;
+    var resource_sate= $("td[name="+state+"]").text();
+   // alert(resource_sate)
+    var url="/indexController/userDel?user_id="+id+"&&resource_id="+rsid+"&&resource_sate="+resource_sate;
+    var aaa = 'delUser'+ id;
+    var a=confirm("确定删除此用户吗？");
+    if(a==true) {
+        console.log("aa");
+        $("a[name="+aaa+"]").attr("href",url);
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
