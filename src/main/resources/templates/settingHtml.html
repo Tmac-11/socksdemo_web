@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:>
+<head>
+    <meta charset="UTF-8">
+    <title>设置</title>
+    <script src="/js/jquery.js"></script>
+</head>
+<body >
+设置奖励天数基数
+<div >
+    <form action="" method="post" id="form">
+     <p>奖励天数= 人数*奖励基数（假设奖励基数设置为3，推荐一人天数为：1*3=3天）</p>
+    <p>当前基数： <input th:value="${dayVar}" id="dayVar" name="dayVar" readonly="readonly"  style="border:0;outline:0;"></p>
+    <p>修改：<input  id="newDayVar" name="newDayVar"></p>
+    </form>
+    <div align="left" style="float:left">
+        <button  th:onclick="'javascript:update()'" id="leftButton"　 >确认</button>
+        <button th:onclick="'javascript:cancel()'" id="rightButton">取消</button>
+    </div>
+
+
+
+
+</div>
+<script language="javascript" type="text/javascript" >
+    window.onload=function init() {
+
+        var vals=$("#dayVar").val();//后台传回来的值
+    }
+function update() {
+
+        var newVar=$("#newDayVar").val();
+
+    var re = /^[0-9]+[0-9]*]*$/;
+
+    if(newVar==""|| !re.test(newVar)){
+           alert("请输入正整数！");
+           return ;
+        }else{
+
+            $("#form").attr("action", "/indexController/updateSetting");
+            $("#form").submit();
+
+        }
+    
+}
+
+function cancel() {
+    window.location.href="/indexController/index";
+}
+    
+</script>
+</body>
+</html>

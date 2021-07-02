@@ -3,6 +3,7 @@ package com.example.socksdemo.service.impl;
 import com.example.socksdemo.mapper.*;
 import com.example.socksdemo.model.*;
 import com.example.socksdemo.service.ResourceService;
+import com.example.socksdemo.service.RewardService;
 import com.example.socksdemo.service.UserService;
 import com.example.socksdemo.utils.*;
 import org.apache.commons.logging.Log;
@@ -34,6 +35,9 @@ public class UserServiceImpl implements UserService{
     HisInfoMapper hisInfoMapper;
     @Autowired
     OrderMapper orderMapper;
+
+    @Autowired
+    RewardService rewardService;
 
 
     @Value("${portRangeStart}")
@@ -160,6 +164,12 @@ public class UserServiceImpl implements UserService{
 
         baseResult.setMsg("success");
         baseResult.setData(userInfo);
+
+        //增加推荐码，给其他用户添加时间
+        if(resParam.getReward_user_code()!=null && resParam.getReward_user_code()!=""){
+            rewardService.addUseTime(resParam.getReward_user_code().trim());
+        }
+
         try{
             UserHisInfo his=new UserHisInfo();
             his.setUser_id(userVo.getUser_id());

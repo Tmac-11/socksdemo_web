@@ -154,4 +154,8 @@
         where user_socks.user_id=#{user_id}
 
     </update>
+    
+    <select id="queryUserCode" parameterType="java.lang.String" resultType="com.example.socksdemo.model.UserInfo" >
+          select * from user_socks u where u.user_code=#{userCode}
+    </select>
 </mapper>

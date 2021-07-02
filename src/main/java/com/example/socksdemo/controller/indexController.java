@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.example.socksdemo.mapper.OrderMapper;
+import com.example.socksdemo.mapper.SettingMapper;
 import com.example.socksdemo.model.*;
 import com.example.socksdemo.service.AmountService;
 import com.example.socksdemo.service.DeviceService;
@@ -53,6 +54,10 @@ public class indexController {
     @Autowired
     OrderMapper orderMapper;
 
+    @Autowired
+    SettingMapper settingMapper;
+
+
     @Value("${logging.file}")
     private String filepath;
 
@@ -71,6 +76,12 @@ public class indexController {
     public String addUserHtml(){
 
         return "addUser";
+    }
+
+    @RequestMapping("/settingHtml")
+    public String settingHtml(Model model){
+        model.addAttribute("dayVar",settingMapper.querySetting());
+        return "settingHtml";
     }
 
 
@@ -310,6 +321,13 @@ public class indexController {
     @RequestMapping("/publishHtml")
     public String publishHtml(){
         return "publishHtml";
+    }
+
+
+    @RequestMapping("/updateSetting")
+    public String updateSetting(Integer newDayVar){
+        settingMapper.upd(newDayVar);
+        return "redirect:/indexController/settingHtml";
     }
 
 

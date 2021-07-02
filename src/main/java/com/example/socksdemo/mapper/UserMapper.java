@@ -26,4 +26,6 @@ public interface UserMapper {
     public List<UserInfo> queryByCode();
     public void updUserCode(UserInfo userInfo);
 
+    public UserInfo queryUserCode(String userCode);
+
 }

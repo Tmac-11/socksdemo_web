@@ -30,7 +30,16 @@ public class ResParam {
     private String rights;
     private String order_good_type;
     private String user_type;
+    private String reward_user_code;
 
+
+    public String getReward_user_code() {
+        return reward_user_code;
+    }
+
+    public void setReward_user_code(String reward_user_code) {
+        this.reward_user_code = reward_user_code;
+    }
     public String getUsername() {
         return username;
     }
